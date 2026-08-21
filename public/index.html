@@ -41,7 +41,7 @@
             }
         }
     </script>
-    <!-- Custom Base Font Scale (Tăng ~12-15% toàn web) -->
+    <!-- Custom Base Font Scale (Cỡ chữ chuẩn dễ nhìn) -->
     <style>
         html {
             font-size: 17.5px;
@@ -215,7 +215,7 @@
                             <i class="fa-solid fa-bolt"></i>
                         </div>
                         <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide">
-                            ⚡ DÒNG TIỀN VI MÔ: PHÂN TÍCH KHỚP LỆNH CHỦ ĐỘNG (ORDERFLOW) - MÃ: <span id="ofHeaderSym" class="text-blue-600 font-mono">HPG</span>
+                            ⚡ DÒNG TIỀN VI MÔ: PHÂN TÍCH KHỚP LỆNH CHỦ ĐỘNG (ORDERFLOW) - MÃ: <span id="ofHeaderSym" class="text-blue-600 font-mono">HPG</span>[cite: 1]
                         </h3>
                     </div>
                     <span id="resSmartMoneyAction" class="text-xs font-bold px-3 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">CÁ MẬP GOM HÀNG CHỦ ĐỘNG 🟢</span>
@@ -223,13 +223,13 @@
 
                 <!-- Cung - Cầu Trong Phiên -->
                 <div class="space-y-2.5">
-                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider block">TỔNG QUAN ÁP LỰC CUNG - CẦU TRONG PHIÊN:</span>
+                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider block">TỔNG QUAN ÁP LỰC CUNG - CẦU TRONG PHIÊN:[cite: 1]</span>
                     <div class="flex justify-between text-xs sm:text-sm font-bold">
                         <span class="text-emerald-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-circle text-[8px] text-emerald-500"></i> CHỦ ĐỘNG MUA (Ăn lên): <span id="resBuyVolDetailed" class="font-mono text-slate-900">-- CP (64.7%)</span>
+                            <i class="fa-solid fa-circle text-[8px] text-emerald-500"></i> CHỦ ĐỘNG MUA (Ăn lên): <span id="resBuyVolDetailed" class="font-mono text-slate-900">-- CP (64.7%)</span>[cite: 1]
                         </span>
                         <span class="text-rose-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-circle text-[8px] text-rose-500"></i> CHỦ ĐỘNG BÁN (Xả xuống): <span id="resSellVolDetailed" class="font-mono text-slate-900">-- CP (35.3%)</span>
+                            <i class="fa-solid fa-circle text-[8px] text-rose-500"></i> CHỦ ĐỘNG BÁN (Xả xuống): <span id="resSellVolDetailed" class="font-mono text-slate-900">-- CP (35.3%)</span>[cite: 1]
                         </span>
                     </div>
 
@@ -239,43 +239,43 @@
                         <div id="resSellBar" class="bg-rose-500 h-full transition-all duration-500 flex items-center justify-start pl-2 text-xs text-white font-bold font-mono" style="width: 40%"></div>
                     </div>
                     <p id="resNetActiveSummary" class="text-sm font-semibold text-emerald-700 flex items-center gap-1.5 pt-0.5">
-                        <i class="fa-solid fa-caret-up text-emerald-600 text-lg"></i> <span>▲ Mua ròng chủ động: +7,200,000 CP (Bên Mua kiểm soát thế trận 🟢)</span>
+                        <i class="fa-solid fa-caret-up text-emerald-600 text-lg"></i> <span>▲ Mua ròng chủ động: +7,200,000 CP (Bên Mua kiểm soát thế trận 🟢)</span>[cite: 1]
                     </p>
                 </div>
 
                 <!-- Phân bổ Quy mô Lệnh (Smart Money) -->
                 <div class="space-y-2.5 pt-2">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-chart-pie text-blue-600"></i> 📊 PHÂN BỔ QUY MÔ LỆNH (DẤU CHÂN CÁ MẬP / SMART MONEY):
+                        <i class="fa-solid fa-chart-pie text-blue-600"></i> 📊 PHÂN BỔ QUY MÔ LỆNH (DẤU CHÂN CÁ MẬP / SMART MONEY):[cite: 1]
                     </span>
                     <div class="overflow-x-auto rounded-xl border border-pastel-border">
                         <table class="w-full text-sm text-left">
                             <thead class="bg-pastel-subtle text-slate-600 border-b border-pastel-border">
                                 <tr>
-                                    <th class="p-3 font-bold">LOẠI NHÀ ĐẦU TƯ</th>
-                                    <th class="p-3 font-bold">KL MUA CHỦ ĐỘNG</th>
-                                    <th class="p-3 font-bold">KL BÁN CHỦ ĐỘNG</th>
-                                    <th class="p-3 font-bold">TƯƠNG QUAN LỰC ĐẨY</th>
+                                    <th class="p-3 font-bold">LOẠI NHÀ ĐẦU TƯ[cite: 1]</th>
+                                    <th class="p-3 font-bold">KL MUA CHỦ ĐỘNG[cite: 1]</th>
+                                    <th class="p-3 font-bold">KL BÁN CHỦ ĐỘNG[cite: 1]</th>
+                                    <th class="p-3 font-bold">TƯƠNG QUAN LỰC ĐẨY[cite: 1]</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-pastel-border bg-white" id="orderflowTierBody">
                                 <tr>
-                                    <td class="p-3 font-bold text-slate-800">🐋 Lớn (>50k CP/lệnh)</td>
-                                    <td class="p-3 font-mono text-emerald-700 font-bold" id="ofSharkBuy">-- CP (53.6%)</td>
-                                    <td class="p-3 font-mono text-rose-600" id="ofSharkSell">-- CP (24.3%)</td>
-                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs font-mono" id="ofSharkBadge">[🟢 Gom ròng +6.4M]</span></td>
+                                    <td class="p-3 font-bold text-slate-800">🐋 Lớn (>50k CP/lệnh)[cite: 1]</td>
+                                    <td class="p-3 font-mono text-emerald-700 font-bold" id="ofSharkBuy">-- CP (53.6%)[cite: 1]</td>
+                                    <td class="p-3 font-mono text-rose-600" id="ofSharkSell">-- CP (24.3%)[cite: 1]</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs font-mono" id="ofSharkBadge">[🟢 Gom ròng +6.4M]</span>[cite: 1]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-bold text-slate-800">🐬 Vừa (10k-50k CP)</td>
-                                    <td class="p-3 font-mono text-emerald-700" id="ofDolphinBuy">-- CP (30.6%)</td>
-                                    <td class="p-3 font-mono text-rose-600" id="ofDolphinSell">-- CP (42.2%)</td>
-                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs font-mono" id="ofDolphinBadge">[🟢 Mua ròng +1.2M]</span></td>
+                                    <td class="p-3 font-bold text-slate-800">🐬 Vừa (10k-50k CP)[cite: 1]</td>
+                                    <td class="p-3 font-mono text-emerald-700" id="ofDolphinBuy">-- CP (30.6%)[cite: 1]</td>
+                                    <td class="p-3 font-mono text-rose-600" id="ofDolphinSell">-- CP (42.2%)[cite: 1]</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs font-mono" id="ofDolphinBadge">[🟢 Mua ròng +1.2M]</span>[cite: 1]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-bold text-slate-800">🦐 Nhỏ (<10k CP - F0)</td>
-                                    <td class="p-3 font-mono text-emerald-700" id="ofRetailBuy">-- CP (15.8%)</td>
-                                    <td class="p-3 font-mono text-rose-600" id="ofRetailSell">-- CP (33.5%)</td>
-                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs font-mono" id="ofRetailBadge">[🔴 Bán ròng -0.4M]</span></td>
+                                    <td class="p-3 font-bold text-slate-800">🦐 Nhỏ (<10k CP - F0)[cite: 1]</td>
+                                    <td class="p-3 font-mono text-emerald-700" id="ofRetailBuy">-- CP (15.8%)[cite: 1]</td>
+                                    <td class="p-3 font-mono text-rose-600" id="ofRetailSell">-- CP (33.5%)[cite: 1]</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs font-mono" id="ofRetailBadge">[🔴 Bán ròng -0.4M]</span>[cite: 1]</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -285,10 +285,10 @@
                 <!-- Tóm Tắt Tín Hiệu AI Box 1 -->
                 <div class="bg-pastel-blueBg border border-pastel-blueBorder rounded-xl p-4 space-y-1.5 shadow-sm">
                     <span class="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-500 text-sm"></i> 💡 TÓM TẮT TÍN HIỆU AI (ORDERFLOW SIGNAL):
+                        <i class="fa-solid fa-lightbulb text-amber-500 text-sm"></i> 💡 TÓM TẮT TÍN HIỆU AI (ORDERFLOW SIGNAL):[cite: 1]
                     </span>
                     <p id="aiOrderflowSummary" class="text-sm text-slate-700 leading-relaxed font-medium">
-                        "Cá mập (Lệnh >50k CP) chiếm áp đảo lượng mua chủ động. Dòng tiền lớn duy trì gom quyết liệt quanh các bước giá hỗ trợ, hấp thụ trọn vẹn áp lực chốt lời ngắn hạn từ nhỏ lẻ."
+                        "Cá mập (Lệnh >50k CP) chiếm áp đảo lượng mua chủ động. Dòng tiền lớn duy trì gom quyết liệt quanh các bước giá hỗ trợ, hấp thụ trọn vẹn áp lực chốt lời ngắn hạn từ nhỏ lẻ."[cite: 1]
                     </p>
                 </div>
             </section>
@@ -302,68 +302,68 @@
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide">
-                        ⚡ CẢNH BÁO TỶ LỆ BIẾN ĐỘNG & QUẢN TRỊ RỦI RO ĐỘNG (ATR ENGINE) - MÃ: <span id="atrHeaderSym" class="text-blue-600 font-mono">HPG</span>
+                        ⚡ CẢNH BÁO TỶ LỆ BIẾN ĐỘNG & QUẢN TRỊ RỦI RO ĐỘNG (ATR ENGINE) - MÃ: <span id="atrHeaderSym" class="text-blue-600 font-mono">HPG</span>[cite: 2]
                     </h3>
                 </div>
 
                 <!-- Snapshot Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                     <div class="bg-pastel-subtle p-4 rounded-xl border border-pastel-border">
-                        <span class="text-xs text-slate-500 font-semibold block">ATR (14 Phiên):</span>
+                        <span class="text-xs text-slate-500 font-semibold block">ATR (14 Phiên):[cite: 2]</span>
                         <span id="atrValueCard" class="text-lg font-black text-slate-900 font-mono block mt-1">-- VNĐ</span>
-                        <span class="text-xs text-slate-400 font-medium">(Biên độ rung lắc trung bình)</span>
+                        <span class="text-xs text-slate-400 font-medium">(Biên độ rung lắc trung bình)[cite: 2]</span>
                     </div>
                     <div class="bg-pastel-subtle p-4 rounded-xl border border-pastel-border">
-                        <span class="text-xs text-slate-500 font-semibold block">% Biến động ngày:</span>
+                        <span class="text-xs text-slate-500 font-semibold block">% Biến động ngày:[cite: 2]</span>
                         <span id="atrPctCard" class="text-lg font-black text-blue-600 font-mono block mt-1">±--%</span>
-                        <span id="atrBasePriceCard" class="text-xs text-slate-400 font-medium">(Giá hiện tại: -- VNĐ)</span>
+                        <span id="atrBasePriceCard" class="text-xs text-slate-400 font-medium">(Giá hiện tại: -- VNĐ)[cite: 2]</span>
                     </div>
                     <div class="bg-pastel-subtle p-4 rounded-xl border border-pastel-border">
-                        <span class="text-xs text-slate-500 font-semibold block">Trạng thái rung lắc:</span>
-                        <span id="atrStatusCard" class="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded inline-block mt-1">BÌNH THƯỜNG 🟢</span>
-                        <span class="text-xs text-slate-400 font-medium block mt-1">(Không có đột biến rủi ro)</span>
+                        <span class="text-xs text-slate-500 font-semibold block">Trạng thái rung lắc:[cite: 2]</span>
+                        <span id="atrStatusCard" class="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded inline-block mt-1">BÌNH THƯỜNG 🟢</span>[cite: 2]
+                        <span class="text-xs text-slate-400 font-medium block mt-1">(Không có đột biến rủi ro)[cite: 2]</span>
                     </div>
                 </div>
 
                 <!-- Dynamic ATR Bracket Table -->
                 <div class="space-y-2.5">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-arrows-split-up-and-left text-amber-600"></i> 🛡️ KHUNG DỪNG LỖ ĐỘNG & MỤC TIÊU THEO ĐỘ BIẾN ĐỘNG (DYNAMIC ATR BRACKET):
+                        <i class="fa-solid fa-arrows-split-up-and-left text-amber-600"></i> 🛡️ KHUNG DỪNG LỖ ĐỘNG & MỤC TIÊU THEO ĐỘ BIẾN ĐỘNG (DYNAMIC ATR BRACKET):[cite: 2]
                     </span>
                     <div class="overflow-x-auto rounded-xl border border-pastel-border">
                         <table class="w-full text-sm text-left">
                             <thead class="bg-pastel-subtle text-slate-600 border-b border-pastel-border">
                                 <tr>
-                                    <th class="p-3 font-bold">VÙNG GIÁ THIẾT LẬP</th>
-                                    <th class="p-3 font-bold">MỨC GIÁ TÍNH TOÁN</th>
-                                    <th class="p-3 font-bold">CÔNG THỨC ATR</th>
-                                    <th class="p-3 font-bold">Ý NGHĨA KỸ THUẬT</th>
+                                    <th class="p-3 font-bold">VÙNG GIÁ THIẾT LẬP[cite: 2]</th>
+                                    <th class="p-3 font-bold">MỨC GIÁ TÍNH TOÁN[cite: 2]</th>
+                                    <th class="p-3 font-bold">CÔNG THỨC ATR[cite: 2]</th>
+                                    <th class="p-3 font-bold">Ý NGHĨA KỸ THUẬT[cite: 2]</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-pastel-border bg-white font-mono">
                                 <tr>
-                                    <td class="p-3 font-sans font-bold text-emerald-700">🎯 Chốt lời Mục tiêu (TP)</td>
+                                    <td class="p-3 font-sans font-bold text-emerald-700">🎯 Chốt lời Mục tiêu (TP)[cite: 2]</td>
                                     <td class="p-3 font-bold text-emerald-700" id="atrTableTP">-- VNĐ</td>
-                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá vào + (3.0 × ATR)</td>
-                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs">[ Vùng kháng cự ATR ]</span></td>
+                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá vào + (3.0 × ATR)[cite: 2]</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs">[ Vùng kháng cự ATR ]</span>[cite: 2]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-sans font-bold text-slate-800">📍 Điểm vào lệnh chuẩn</td>
-                                    <td class="p-3 font-bold text-slate-900" id="atrTableEntry">-- VNĐ (Base)</td>
-                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá khớp hiện tại</td>
-                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs">[ Điểm tham chiếu ]</span></td>
+                                    <td class="p-3 font-sans font-bold text-slate-800">📍 Điểm vào lệnh chuẩn[cite: 2]</td>
+                                    <td class="p-3 font-bold text-slate-900" id="atrTableEntry">-- VNĐ (Base)[cite: 2]</td>
+                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá khớp hiện tại[cite: 2]</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs">[ Điểm tham chiếu ]</span>[cite: 2]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-sans font-bold text-rose-600">🛑 Cắt lỗ An toàn (SL)</td>
+                                    <td class="p-3 font-sans font-bold text-rose-600">🛑 Cắt lỗ An toàn (SL)[cite: 2]</td>
                                     <td class="p-3 font-bold text-rose-600" id="atrTableSL">-- VNĐ</td>
-                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá vào - (2.0 × ATR)</td>
-                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs">[ Thoát khi gãy biên ]</span></td>
+                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá vào - (2.0 × ATR)[cite: 2]</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs">[ Thoát khi gãy biên ]</span>[cite: 2]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-sans font-bold text-amber-700">🔒 Chặn lãi (Trailing Stop)</td>
+                                    <td class="p-3 font-sans font-bold text-amber-700">🔒 Chặn lãi (Trailing Stop)[cite: 2]</td>
                                     <td class="p-3 font-bold text-amber-800" id="atrTableTrailing">-- VNĐ</td>
-                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Đỉnh gần nhất - 1.0 × ATR</td>
-                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200 font-bold text-xs">[ Bảo toàn lợi nhuận ]</span></td>
+                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Đỉnh gần nhất - 1.0 × ATR[cite: 2]</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200 font-bold text-xs">[ Bảo toàn lợi nhuận ]</span>[cite: 2]</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -373,20 +373,41 @@
                 <!-- Noise Filter Spectrum -->
                 <div class="space-y-2.5">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-filter text-slate-500"></i> 🚦 THƯỚC ĐO RỦI RO & BẪY RUNG LẮC (NOISE FILTER):
+                        <i class="fa-solid fa-filter text-slate-500"></i> 🚦 THƯỚC ĐO RỦI RO & BẪY RUNG LẮC (NOISE FILTER):[cite: 2]
                     </span>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                         <div id="noiseLowBox" class="p-3.5 rounded-xl border border-pastel-border bg-pastel-subtle text-slate-600">
-                            <span class="font-bold block text-slate-800">THẤP (0.5 - 1.5%)</span>
-                            <span class="text-xs text-slate-500 mt-0.5 block">Cổ phiếu phòng thủ / Bluechip ít biến động</span>
+                            <span class="font-bold block text-slate-800">THẤP (0.5 - 1.5%)[cite: 2]</span>
+                            <span class="text-xs text-slate-500 mt-0.5 block">Cổ phiếu phòng thủ / Bluechip ít biến động[cite: 2]</span>
                         </div>
                         <div id="noiseMidBox" class="p-3.5 rounded-xl border border-pastel-greenBorder bg-pastel-greenBg text-emerald-800 shadow-sm">
-                            <span class="font-bold block text-emerald-900" id="noiseMidText">🟩 ĐANG Ở VÙNG NÀY (±2.28%)</span>
-                            <span class="text-xs text-emerald-700 mt-0.5 block">Biên độ chuẩn để lướt sóng T+</span>
+                            <span class="font-bold block text-emerald-900" id="noiseMidText">🟩 ĐANG Ở VÙNG NÀY (±2.28%)[cite: 2]</span>
+                            <span class="text-xs text-emerald-700 mt-0.5 block">Biên độ chuẩn để lướt sóng T+[cite: 2]</span>
                         </div>
                         <div id="noiseHighBox" class="p-3.5 rounded-xl border border-pastel-border bg-pastel-subtle text-slate-600">
-                            <span class="font-bold block text-slate-800">CAO NGUY HIỂM (> 3.5%)</span>
-                            <span class="text-xs text-slate-500 mt-0.5 block">Hàng đầu cơ / Penny biến động mạnh, dễ quét SL</span>
+                            <span class="font-bold block text-slate-800">CAO NGUY HIỂM (> 3.5%)[cite: 2]</span>
+                            <span class="text-xs text-slate-500 mt-0.5 block">Hàng đầu cơ / Penny biến động mạnh, dễ quét SL[cite: 2]</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Position Sizing Tool -->
+                <div class="bg-pastel-subtle border border-pastel-border rounded-xl p-4 space-y-3">
+                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-blue-600"></i> 💼 TÍNH TOÁN SỐ LƯỢNG MUA THEO QUẢN TRỊ VỐN (NAV):
+                    </span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <label class="block text-slate-500 mb-1 font-medium">Tổng vốn NAV (VNĐ):</label>
+                            <input type="number" id="calcNav" value="100000000" step="10000000" oninput="calculatePositionSize()" class="w-full bg-white border border-pastel-border rounded-lg px-3 py-1.5 font-mono font-bold text-slate-800 focus:outline-none focus:border-blue-400">
+                        </div>
+                        <div>
+                            <label class="block text-slate-500 mb-1 font-medium">Rủi ro tối đa mỗi lệnh (%):</label>
+                            <input type="number" id="calcRiskPct" value="2" step="0.5" max="10" min="0.5" oninput="calculatePositionSize()" class="w-full bg-white border border-pastel-border rounded-lg px-3 py-1.5 font-mono font-bold text-slate-800 focus:outline-none focus:border-blue-400">
+                        </div>
+                        <div class="bg-white p-2.5 rounded-lg border border-pastel-border flex flex-col justify-center">
+                            <span class="text-slate-500 block text-[11px]">Số CP được phép mua tối đa:</span>
+                            <span id="calcSharesResult" class="font-bold text-blue-700 font-mono text-base">-- CP</span>
                         </div>
                     </div>
                 </div>
@@ -394,11 +415,11 @@
                 <!-- Tóm Tắt Tín Hiệu AI Box 2 -->
                 <div class="bg-pastel-amberBg border border-pastel-amberBorder rounded-xl p-4 space-y-1.5 shadow-sm">
                     <span class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-600 text-sm"></i> 💡 TƯ VẤN QUẢN TRỊ VỐN TỪ AI (ATR-BASED SIZING):
+                        <i class="fa-solid fa-lightbulb text-amber-600 text-sm"></i> 💡 TƯ VẤN QUẢN TRỊ VỐN TỪ AI (ATR-BASED SIZING):[cite: 2]
                     </span>
                     <ul class="text-sm text-slate-800 space-y-1.5 leading-relaxed font-medium" id="aiAtrCapitalAdvice">
-                        <li>• Khuyến nghị đặt Stop Loss cách 2.0x ATR để tránh bị 'quét dừng lỗ' bởi các nhịp rung lắc tự nhiên trong phiên.</li>
-                        <li>• Khi giá bứt phá vượt qua mốc mục tiêu 1, tự động nâng điểm Trailing Stop lên mốc hòa vốn để khóa lợi nhuận an toàn.</li>
+                        <li>• Khuyến nghị đặt Stop Loss cách 2.0x ATR để tránh bị 'quét dừng lỗ' bởi các nhịp rung lắc tự nhiên trong phiên.[cite: 2]</li>
+                        <li>• Khi giá bứt phá vượt qua mốc mục tiêu 1, tự động nâng điểm Trailing Stop lên mốc hòa vốn để khóa lợi nhuận an toàn.[cite: 2]</li>
                     </ul>
                 </div>
             </section>
@@ -412,102 +433,57 @@
                         <i class="fa-solid fa-building-columns"></i>
                     </div>
                     <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide">
-                        📑 ĐỊNH GIÁ & BỘ LỌC RỦI RO CƠ BẢN (FUNDAMENTAL HEALTH CHECK) - MÃ: <span id="faHeaderSym" class="text-blue-600 font-mono">HPG</span>
+                        📑 ĐỊNH GIÁ & BỘ LỌC RỦI RO CƠ BẢN (FUNDAMENTAL HEALTH CHECK) - MÃ: <span id="faHeaderSym" class="text-blue-600 font-mono">HPG</span>[cite: 3]
                     </h3>
                 </div>
 
                 <!-- Financial Health Score Card -->
                 <div class="bg-pastel-subtle p-4 rounded-xl border border-pastel-border space-y-2">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">🛡️ ĐIỂM SỨC KHỎE TÀI CHÍNH (FINANCIAL HEALTH SCORE):</span>
-                        <span id="faScoreBadge" class="text-xs font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg">TỔNG ĐIỂM: [ 85 / 100 ] 🟢 DOANH NGHIỆP RẤT KHỎE MẠNH</span>
+                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">🛡️ ĐIỂM SỨC KHỎE TÀI CHÍNH (FINANCIAL HEALTH SCORE):[cite: 3]</span>
+                        <span id="faScoreBadge" class="text-xs font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg">TỔNG ĐIỂM: [ 85 / 100 ] 🟢 DOANH NGHIỆP RẤT KHỎE MẠNH</span>[cite: 3]
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm pt-1 text-slate-700 font-medium">
                         <div>• Khả năng thanh toán: <strong class="text-slate-900">Tốt (D/E < 1.2)</strong></div>
                         <div>• Tăng trưởng LN: <strong class="text-emerald-700 font-bold">+28.5% YoY</strong></div>
-                        <div>• Cảnh báo rủi ro: <strong class="text-emerald-700 font-bold">KHÔNG CÓ VI PHẠM</strong></div>
-                    </div>
-                </div>
-
-                <!-- So sánh Định giá Ngành -->
-                <div class="space-y-2.5">
-                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-scale-balanced text-blue-600"></i> 📊 SO SÁNH ĐỊNH GIÁ SO VỚI TRUNG BÌNH TOÀN THỊ TRƯỜNG:
-                    </span>
-                    <div class="overflow-x-auto rounded-xl border border-pastel-border">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-pastel-subtle text-slate-600 border-b border-pastel-border">
-                                <tr>
-                                    <th class="p-3 font-bold">CHỈ SỐ CHÍNH</th>
-                                    <th class="p-3 font-bold">DOANH NGHIỆP</th>
-                                    <th class="p-3 font-bold">TRUNG BÌNH TOÀN SÀN</th>
-                                    <th class="p-3 font-bold">ĐÁNH GIÁ ĐỊNH GIÁ</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-pastel-border bg-white font-mono">
-                                <tr>
-                                    <td class="p-3 font-sans font-bold text-slate-800">P/E (Hệ số giá/LN)</td>
-                                    <td class="p-3 font-bold text-blue-700" id="faValPE">--x</td>
-                                    <td class="p-3 text-slate-500">14.2x</td>
-                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs" id="faEvalPE">[ 🟢 RẺ HƠN THỊ TRƯỜNG ]</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-sans font-bold text-slate-800">P/B (Giá trị sổ sách)</td>
-                                    <td class="p-3 font-bold text-blue-700" id="faValPB">--x</td>
-                                    <td class="p-3 text-slate-500">1.65x</td>
-                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs" id="faEvalPB">[ 🟢 VÙNG HẤP DẪN ]</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-sans font-bold text-slate-800">ROE (Hiệu quả sử dụng vốn)</td>
-                                    <td class="p-3 font-bold text-emerald-700" id="faValROE">--%</td>
-                                    <td class="p-3 text-slate-500">13.0%</td>
-                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200 font-bold text-xs" id="faEvalROE">[ ⭐ VƯỢT TRỘI ]</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-sans font-bold text-slate-800">Tỷ suất Cổ tức</td>
-                                    <td class="p-3 font-bold text-slate-900" id="faValDiv">--% / năm</td>
-                                    <td class="p-3 text-slate-500">2.5% / năm</td>
-                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs" id="faEvalDiv">[ 🟢 ỔN ĐỊNH ]</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div>• Cảnh báo rủi ro: <strong class="text-emerald-700 font-bold">KHÔNG CÓ VI PHẠM</strong>[cite: 3]</div>
                     </div>
                 </div>
 
                 <!-- Value Trap Filter Checklist -->
                 <div class="space-y-2.5">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-list-check text-emerald-600"></i> 🚦 BỘ LỌC RỦI RO & BẪY GIÁ (VALUE TRAP FILTER):
+                        <i class="fa-solid fa-list-check text-emerald-600"></i> 🚦 BỘ LỌC RỦI RO & BẪY GIÁ (VALUE TRAP FILTER):[cite: 3]
                     </span>
                     <div class="overflow-x-auto rounded-xl border border-pastel-border">
                         <table class="w-full text-sm text-left">
                             <thead class="bg-pastel-subtle text-slate-600 border-b border-pastel-border">
                                 <tr>
-                                    <th class="p-3 font-bold">TIÊU CHÍ KIỂM TRA</th>
-                                    <th class="p-3 font-bold">KẾT QUẢ ĐẠT ĐƯỢC</th>
-                                    <th class="p-3 font-bold">TRẠNG THÁI RỦI RO</th>
+                                    <th class="p-3 font-bold">TIÊU CHÍ KIỂM TRA[cite: 3]</th>
+                                    <th class="p-3 font-bold">KẾT QUẢ ĐẠT ĐƯỢC[cite: 3]</th>
+                                    <th class="p-3 font-bold">TRẠNG THÁI RỦI RO[cite: 3]</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-pastel-border bg-white">
                                 <tr>
-                                    <td class="p-3 font-medium text-slate-800">1. Rủi ro Cổ phiếu Rác (Penny/Junk)</td>
+                                    <td class="p-3 font-medium text-slate-800">1. Rủi ro Cổ phiếu Rác (Penny/Junk)[cite: 3]</td>
                                     <td class="p-3 text-slate-600" id="trapPennyResult">Vốn hóa lớn/vừa, thanh khoản dồi dào trên sàn</td>
-                                    <td class="p-3 font-bold text-emerald-700">[ ✅ AN TOÀN TUYỆT ĐỐI ]</td>
+                                    <td class="p-3 font-bold text-emerald-700">[ ✅ AN TOÀN TUYỆT ĐỐI ][cite: 3]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-medium text-slate-800">2. Rủi ro Pha loãng cổ phiếu</td>
-                                    <td class="p-3 text-slate-600">Không có kế hoạch phát hành riêng lẻ</td>
-                                    <td class="p-3 font-bold text-emerald-700">[ ✅ AN TOÀN ]</td>
+                                    <td class="p-3 font-medium text-slate-800">2. Rủi ro Pha loãng cổ phiếu[cite: 3]</td>
+                                    <td class="p-3 text-slate-600">Không có kế hoạch phát hành riêng lẻ[cite: 3]</td>
+                                    <td class="p-3 font-bold text-emerald-700">[ ✅ AN TOÀN ][cite: 3]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-medium text-slate-800">3. Rủi ro Đòn bẩy nợ vay (D/E)</td>
-                                    <td class="p-3 text-slate-600">Nợ vay / Vốn CSH kiểm soát dưới 1.2</td>
-                                    <td class="p-3 font-bold text-emerald-700">[ ✅ ĐẠT TIÊU CHUẨN ]</td>
+                                    <td class="p-3 font-medium text-slate-800">3. Rủi ro Đòn bẩy nợ vay (D/E)[cite: 3]</td>
+                                    <td class="p-3 text-slate-600">Nợ vay / Vốn CSH kiểm soát an toàn</td>
+                                    <td class="p-3 font-bold text-emerald-700">[ ✅ ĐẠT TIÊU CHUẨN ][cite: 3]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-medium text-slate-800">4. Lịch sự kiện & Quyền cổ đông 2026</td>
+                                    <td class="p-3 font-medium text-slate-800">4. Lịch sự kiện & Quyền cổ đông 2026[cite: 3]</td>
                                     <td class="p-3 text-slate-600 font-medium" id="trapEventsResult">Đang tải lịch sự kiện 2026...</td>
-                                    <td class="p-3 font-bold text-amber-700">[ ⚠️ LƯU Ý LỊCH T+ ]</td>
+                                    <td class="p-3 font-bold text-amber-700">[ ⚠️ LƯU Ý LỊCH T+ ][cite: 3]</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -517,10 +493,10 @@
                 <!-- Tóm Tắt Tín Hiệu AI Box 3 -->
                 <div class="bg-pastel-greenBg border border-pastel-greenBorder rounded-xl p-4 space-y-1.5 shadow-sm">
                     <span class="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-600 text-sm"></i> 💡 KẾT LUẬN TỔNG HỢP TỪ AI (FA OVERLAY):
+                        <i class="fa-solid fa-lightbulb text-amber-600 text-sm"></i> 💡 KẾT LUẬN TỔNG HỢP TỪ AI (FA OVERLAY):[cite: 3]
                     </span>
                     <p id="aiFaSummary" class="text-sm text-slate-700 leading-relaxed font-medium">
-                        "Cổ phiếu không thuộc nhóm bẫy giá (Value Trap). Nền tảng tài chính lành mạnh và hiệu quả sinh lời ROE cao tạo bệ đỡ vững chắc cho các điểm nổ breakout kỹ thuật."
+                        "Cổ phiếu không thuộc nhóm bẫy giá (Value Trap). Nền tảng tài chính lành mạnh và hiệu quả sinh lời ROE cao tạo bệ đỡ vững chắc cho các điểm nổ breakout kỹ thuật."[cite: 3]
                     </p>
                 </div>
             </section>
@@ -591,6 +567,8 @@
 
     <script>
         let predictionChartInstance = null;
+        let currentStockPrice = 28000;
+        let currentDynamicSL = 26500;
 
         window.addEventListener('DOMContentLoaded', () => {
             analyzeStock('HPG');
@@ -627,9 +605,25 @@
             }
         }
 
+        function calculatePositionSize() {
+            const nav = parseFloat(document.getElementById('calcNav').value) || 100000000;
+            const riskPct = parseFloat(document.getElementById('calcRiskPct').value) || 2;
+            const maxRiskAmount = nav * (riskPct / 100);
+            
+            const riskPerShare = Math.max(currentStockPrice - currentDynamicSL, currentStockPrice * 0.03);
+            const maxShares = Math.floor(maxRiskAmount / riskPerShare);
+            const roundedLotShares = Math.floor(maxShares / 100) * 100;
+
+            document.getElementById('calcSharesResult').textContent = `${(roundedLotShares > 0 ? roundedLotShares : 100).toLocaleString()} CP (~${((roundedLotShares > 0 ? roundedLotShares : 100) * currentStockPrice).toLocaleString()} VNĐ)`;
+        }
+
         function renderDashboard(data) {
             const m = data.metrics;
             const adv = data.advice;
+
+            currentStockPrice = m.current_price;
+            currentDynamicSL = m.atr_risk_management.dynamic_stop_loss;
+            calculatePositionSize();
 
             // 1. Macro Section
             document.getElementById('vnindexPoint').textContent = m.macro_vnindex.vnindex_point.toLocaleString();
@@ -741,11 +735,6 @@
             // 7. Fundamental Module
             const fa = m.fundamental_overlay;
             document.getElementById('faScoreBadge').textContent = `TỔNG ĐIỂM: [ ${fa.health_score} / 100 ] 🟢 DOANH NGHIỆP RẤT KHỎE MẠNH`;
-            document.getElementById('faValPE').textContent = `${fa.pe_ratio}x`;
-            document.getElementById('faValPB').textContent = `${fa.pb_ratio}x`;
-            document.getElementById('faValROE').textContent = `${fa.roe_pct}%`;
-            document.getElementById('faValDiv').textContent = `${fa.dividend_yield}% / năm`;
-
             document.getElementById('trapPennyResult').textContent = fa.is_penny_risk ? 'Cổ phiếu Penny, cần thận trọng thanh khoản' : 'Vốn hóa lớn/vừa, thanh khoản dồi dào trên sàn';
             document.getElementById('trapEventsResult').textContent = fa.corporate_actions.slice(0, 2).join(' | ');
 
