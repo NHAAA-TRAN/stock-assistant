@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import httpx
 
+# Khởi tạo instance FastAPI chuẩn Vercel
 app = FastAPI(title="VN Stock Trading Pro Advisory Engine")
 
 app.add_middleware(
