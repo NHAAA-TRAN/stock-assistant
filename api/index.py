@@ -1,6 +1,5 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from http.server import BaseHTTPRequestHandler
+import json
 import os
 import time
 from datetime import datetime, timedelta
@@ -9,17 +8,6 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import httpx
-
-# Khởi tạo instance FastAPI chuẩn Vercel
-app = FastAPI(title="VN Stock Trading Pro Advisory Engine")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 ANALYSIS_CACHE: Dict[str, Any] = {}
 SCREENER_CACHE: Dict[str, Any] = {}
@@ -31,10 +19,6 @@ WATCHLIST_UNIVERSE = [
     "STB", "VPB", "VNM", "GAS", "MSN", "GVR", "PLX", "VRE", "DGC", "PVD",
     "KBC", "DIG", "DXG", "NLG", "VIX", "SHS", "HCM", "PDR", "VCI", "HSG"
 ]
-
-
-class StockRequest(BaseModel):
-    symbol: str = Field(..., min_length=2, max_length=10)
 
 
 def get_next_trading_days(start_date: datetime, count: int = 5) -> List[str]:
@@ -344,156 +328,182 @@ ADVICE_JSON_SCHEMA = {
 }
 
 
-@app.get("/api/screener")
-@app.get("/screener")
-async def daily_market_screener():
-    now = time.time()
-    if "top5_screener" in SCREENER_CACHE:
-        cached_screener, cached_time = SCREENER_CACHE["top5_screener"]
-        if now - cached_time < 1800:
-            return cached_screener
+class handler(BaseHTTPRequestHandler):
+    """Vercel Native Serverless Function Handler"""
 
-    screened_results = []
-    for sym in WATCHLIST_UNIVERSE:
+    def _set_headers(self, status_code=200):
+        self.send_response(status_code)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', '*')
+        self.end_headers()
+
+    def do_OPTIONS(self):
+        self._set_headers(200)
+
+    def do_GET(self):
+        # Route: Daily Screener
+        if "/screener" in self.path:
+            now = time.time()
+            if "top5_screener" in SCREENER_CACHE:
+                cached_screener, cached_time = SCREENER_CACHE["top5_screener"]
+                if now - cached_time < 1800:
+                    self._set_headers(200)
+                    self.wfile.write(json.dumps(cached_screener).encode('utf-8'))
+                    return
+
+            screened_results = []
+            for sym in WATCHLIST_UNIVERSE:
+                try:
+                    ticker = f"{sym}.VN"
+                    stock = yf.Ticker(ticker)
+                    df = stock.history(period="6mo", interval="1d")
+                    if df is None or df.empty or len(df) < 30:
+                        continue
+
+                    df["SMA20"] = df["Close"].rolling(window=20).mean()
+                    df["SMA50"] = df["Close"].rolling(window=50).mean()
+                    df["RSI"] = calculate_rsi_wilder(df["Close"], period=14)
+                    df["ATR"] = calculate_atr(df, period=14)
+
+                    latest = df.iloc[-1]
+                    prev = df.iloc[-2]
+                    close = float(latest["Close"])
+                    vol = int(latest["Volume"])
+                    avg_vol20 = int(df["Volume"].tail(20).mean())
+                    rsi = float(latest["RSI"]) if not pd.isna(latest["RSI"]) else 50.0
+                    sma20 = float(latest["SMA20"])
+
+                    is_breakout = (close >= sma20) and (vol >= avg_vol20 * 1.15) and (50 <= rsi <= 70)
+                    rel = calculate_signal_reliability(df)
+                    orderflow = calculate_orderflow_pressure(df)
+                    score = rel["win_rate"] * 0.6 + (vol / (avg_vol20 + 1)) * 20 + (orderflow["active_buy_pct"] * 0.2)
+
+                    if is_breakout or rel["win_rate"] >= 65:
+                        screened_results.append({
+                            "symbol": sym,
+                            "price": close,
+                            "change_pct": round(((close - float(prev["Close"])) / float(prev["Close"])) * 100, 2),
+                            "volume": vol,
+                            "vol_vs_avg20": round(vol / (avg_vol20 + 1), 2),
+                            "rsi": round(rsi, 1),
+                            "win_rate": rel["win_rate"],
+                            "badge_rating": rel["badge_rating"],
+                            "smart_money_signal": orderflow["smart_money_signal"],
+                            "score": round(score, 1)
+                        })
+                except Exception:
+                    continue
+
+            screened_results.sort(key=lambda x: x["score"], reverse=True)
+            top_5 = screened_results[:5]
+
+            response = {
+                "updated_at": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                "total_scanned": len(WATCHLIST_UNIVERSE),
+                "top_picks": top_5
+            }
+            SCREENER_CACHE["top5_screener"] = (response, now)
+            self._set_headers(200)
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+            return
+
+        self._set_headers(200)
+        self.wfile.write(json.dumps({"status": "healthy", "service": "VN Stock Engine"}).encode('utf-8'))
+
+    def do_POST(self):
         try:
-            ticker = f"{sym}.VN"[cite: 1]
-            stock = yf.Ticker(ticker)[cite: 1]
-            df = stock.history(period="6mo", interval="1d")[cite: 1]
-            if df is None or df.empty or len(df) < 30:
-                continue
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            req_data = json.loads(body)
+            sym = req_data.get("symbol", "").upper().strip()
 
-            df["SMA20"] = df["Close"].rolling(window=20).mean()[cite: 1]
-            df["SMA50"] = df["Close"].rolling(window=50).mean()[cite: 1]
+            if not sym or len(sym) < 2:
+                self._set_headers(400)
+                self.wfile.write(json.dumps({"detail": "Mã cổ phiếu không hợp lệ."}).encode('utf-8'))
+                return
+
+            api_key = os.environ.get("GEMINI_API_KEY")
+            if not api_key:
+                self._set_headers(500)
+                self.wfile.write(json.dumps({"detail": "Chưa cấu hình GEMINI_API_KEY trên Vercel Environment Variables"}).encode('utf-8'))
+                return
+
+            # Kiểm tra Cache
+            now = time.time()
+            if sym in ANALYSIS_CACHE:
+                cached_data, cached_time = ANALYSIS_CACHE[sym]
+                if now - cached_time < CACHE_TTL:
+                    self._set_headers(200)
+                    self.wfile.write(json.dumps(cached_data).encode('utf-8'))
+                    return
+
+            # Tải dữ liệu Yahoo Finance
+            ticker = f"{sym}.VN"
+            stock = yf.Ticker(ticker)
+            df = stock.history(period="6mo", interval="1d")
+            if df is None or df.empty or len(df) < 20:
+                self._set_headers(404)
+                self.wfile.write(json.dumps({"detail": f"Không tìm thấy dữ liệu cho mã '{sym}'."}).encode('utf-8'))
+                return
+
+            # Tính toán chỉ báo
+            df["SMA20"] = df["Close"].rolling(window=20).mean()
+            df["SMA50"] = df["Close"].rolling(window=50).mean()
             df["RSI"] = calculate_rsi_wilder(df["Close"], period=14)
             df["ATR"] = calculate_atr(df, period=14)
 
-            latest = df.iloc[-1][cite: 1]
-            prev = df.iloc[-2][cite: 1]
-            close = float(latest["Close"])[cite: 1]
-            vol = int(latest["Volume"])[cite: 1]
-            avg_vol20 = int(df["Volume"].tail(20).mean())
-            rsi = float(latest["RSI"]) if not pd.isna(latest["RSI"]) else 50.0
-            sma20 = float(latest["SMA20"])
+            latest = df.iloc[-1]
+            prev = df.iloc[-2]
+            curr_price = float(latest["Close"])
+            change = curr_price - float(prev["Close"])
+            pct_change = (change / float(prev["Close"])) * 100
 
-            is_breakout = (close >= sma20) and (vol >= avg_vol20 * 1.15) and (50 <= rsi <= 70)
-            rel = calculate_signal_reliability(df)
+            recent_10 = df.tail(10)
+            history_dates = [pd.to_datetime(d).strftime("%d/%m") for d in recent_10.index]
+            history_prices = [round(float(p), 0) for p in recent_10["Close"]]
+
+            last_trade_date = pd.to_datetime(recent_10.index[-1]).to_pydatetime()
+            future_dates = get_next_trading_days(last_trade_date, count=5)
+
+            macro_info = fetch_vnindex_macro()
+            signal_reliability = calculate_signal_reliability(df)
             orderflow = calculate_orderflow_pressure(df)
-            score = rel["win_rate"] * 0.6 + (vol / (avg_vol20 + 1)) * 20 + (orderflow["active_buy_pct"] * 0.2)
-
-            if is_breakout or rel["win_rate"] >= 65:
-                screened_results.append({
-                    "symbol": sym,
-                    "price": close,
-                    "change_pct": round(((close - float(prev["Close"])) / float(prev["Close"])) * 100, 2),
-                    "volume": vol,
-                    "vol_vs_avg20": round(vol / (avg_vol20 + 1), 2),
-                    "rsi": round(rsi, 1),
-                    "win_rate": rel["win_rate"],
-                    "badge_rating": rel["badge_rating"],
-                    "smart_money_signal": orderflow["smart_money_signal"],
-                    "score": round(score, 1)
-                })
-        except Exception:
-            continue
-
-    screened_results.sort(key=lambda x: x["score"], reverse=True)
-    top_5 = screened_results[:5]
-
-    response = {
-        "updated_at": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-        "total_scanned": len(WATCHLIST_UNIVERSE),
-        "top_picks": top_5
-    }
-    SCREENER_CACHE["top5_screener"] = (response, now)
-    return response
-
-
-@app.post("/api/analyze")
-@app.post("/analyze")
-async def analyze_stock(req: StockRequest):
-    sym = req.symbol.upper().strip()
-    api_key = os.environ.get("GEMINI_API_KEY")[cite: 1]
-    if not api_key:
-        raise HTTPException(
-            status_code=500,
-            detail="Chưa cấu hình GEMINI_API_KEY trên Vercel Environment Variables"
-        )
-
-    now = time.time()
-    if sym in ANALYSIS_CACHE:
-        cached_data, cached_time = ANALYSIS_CACHE[sym][cite: 1]
-        if now - cached_time < CACHE_TTL:
-            return cached_data
-
-    try:
-        ticker = f"{sym}.VN"[cite: 1]
-        stock = yf.Ticker(ticker)[cite: 1]
-        df = stock.history(period="6mo", interval="1d")[cite: 1]
-        if df is None or df.empty or len(df) < 20:[cite: 1]
-            raise HTTPException(
-                status_code=404,
-                detail=f"Không tìm thấy dữ liệu cho mã '{sym}'. Vui lòng kiểm tra lại mã cổ phiếu."[cite: 1]
+            fundamental = calculate_fundamental_and_events(stock, curr_price)
+            atr_risk = calculate_atr_risk_management(df, curr_price)
+            realtime_alerts = evaluate_realtime_triggers(
+                curr_price=curr_price,
+                rsi=float(latest["RSI"]),
+                dynamic_buy_zone=atr_risk["trailing_stop"]
             )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Lỗi truy xuất dữ liệu: {str(e)}")[cite: 1]
 
-    df["SMA20"] = df["Close"].rolling(window=20).mean()[cite: 1]
-    df["SMA50"] = df["Close"].rolling(window=50).mean()[cite: 1]
-    df["RSI"] = calculate_rsi_wilder(df["Close"], period=14)
-    df["ATR"] = calculate_atr(df, period=14)
+            metrics = {
+                "symbol": sym,
+                "current_price": curr_price,
+                "change": change,
+                "percent_change": pct_change,
+                "volume": int(latest["Volume"]),
+                "avg_vol_20": int(df["Volume"].tail(20).mean()),
+                "rsi": round(float(latest["RSI"]), 1) if not pd.isna(latest["RSI"]) else 50.0,
+                "sma20": round(float(latest["SMA20"]), 0) if not pd.isna(latest["SMA20"]) else curr_price,
+                "sma50": round(float(latest["SMA50"]), 0) if not pd.isna(latest["SMA50"]) else curr_price,
+                "support_20": float(df["Low"].tail(20).min()),
+                "resistance_20": float(df["High"].tail(20).max()),
+                "history_dates": history_dates,
+                "history_prices": history_prices,
+                "future_dates": future_dates,
+                "macro_vnindex": macro_info,
+                "signal_reliability": signal_reliability,
+                "orderflow_pressure": orderflow,
+                "fundamental_overlay": fundamental,
+                "atr_risk_management": atr_risk,
+                "realtime_alerts": realtime_alerts
+            }
 
-    latest = df.iloc[-1][cite: 1]
-    prev = df.iloc[-2][cite: 1]
-    curr_price = float(latest["Close"])[cite: 1]
-    change = curr_price - float(prev["Close"])[cite: 1]
-    pct_change = (change / float(prev["Close"])) * 100[cite: 1]
-
-    recent_10 = df.tail(10)[cite: 1]
-    history_dates = [pd.to_datetime(d).strftime("%d/%m") for d in recent_10.index][cite: 1]
-    history_prices = [round(float(p), 0) for p in recent_10["Close"]][cite: 1]
-
-    last_trade_date = pd.to_datetime(recent_10.index[-1]).to_pydatetime()[cite: 1]
-    future_dates = get_next_trading_days(last_trade_date, count=5)[cite: 1]
-
-    macro_info = fetch_vnindex_macro()
-    signal_reliability = calculate_signal_reliability(df)
-    orderflow = calculate_orderflow_pressure(df)
-    fundamental = calculate_fundamental_and_events(stock, curr_price)
-    atr_risk = calculate_atr_risk_management(df, curr_price)
-    realtime_alerts = evaluate_realtime_triggers(
-        curr_price=curr_price,
-        rsi=float(latest["RSI"]),
-        dynamic_buy_zone=atr_risk["trailing_stop"]
-    )
-
-    metrics = {
-        "symbol": sym,
-        "current_price": curr_price,
-        "change": change,
-        "percent_change": pct_change,
-        "volume": int(latest["Volume"]),
-        "avg_vol_20": int(df["Volume"].tail(20).mean()),
-        "rsi": round(float(latest["RSI"]), 1) if not pd.isna(latest["RSI"]) else 50.0,
-        "sma20": round(float(latest["SMA20"]), 0) if not pd.isna(latest["SMA20"]) else curr_price,
-        "sma50": round(float(latest["SMA50"]), 0) if not pd.isna(latest["SMA50"]) else curr_price,
-        "support_20": float(df["Low"].tail(20).min()),
-        "resistance_20": float(df["High"].tail(20).max()),
-        "history_dates": history_dates,
-        "history_prices": history_prices,
-        "future_dates": future_dates,
-        "macro_vnindex": macro_info,
-        "signal_reliability": signal_reliability,
-        "orderflow_pressure": orderflow,
-        "fundamental_overlay": fundamental,
-        "atr_risk_management": atr_risk,
-        "realtime_alerts": realtime_alerts
-    }
-
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"[cite: 1]
-    
-    prompt = f"""
+            # Gọi Gemini 3.6 Flash
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
+            prompt = f"""
 Bạn là Chuyên gia Tư vấn Đầu tư Chứng khoán cấp cao tại thị trường Việt Nam. Phân tích mã {sym}:
 - THỊ TRƯỜNG CHUNG (VN-INDEX): {macro_info['vnindex_point']} ({macro_info['vnindex_change_pct']:+.2f}%), RSI: {macro_info['vnindex_rsi']}, Xu hướng: {macro_info['macro_status']}
 - GIÁ & KỸ THUẬT: {metrics['current_price']:,.0f} VNĐ ({metrics['percent_change']:+.2f}%), Khối lượng: {metrics['volume']:,} CP (TB 20P: {metrics['avg_vol_20']:,} CP), RSI: {metrics['rsi']}, SMA20: {metrics['sma20']:,.0f}
@@ -506,45 +516,43 @@ Bạn là Chuyên gia Tư vấn Đầu tư Chứng khoán cấp cao tại thị 
 Hãy kết hợp bối cảnh dòng tiền lớn (Cá mập gom hay Bull trap), định giá cơ bản và quản trị rủi ro ATR để đưa ra khuyến nghị trading chính xác, tỷ trọng và dự báo 5 phiên.
 """
 
-    payload = {
-        "contents": [{"role": "user", "parts": [{"text": prompt}]}],[cite: 1]
-        "generationConfig": {
-            "temperature": 0.2,
-            "maxOutputTokens": 2048,[cite: 1]
-            "responseMimeType": "application/json",
-            "responseSchema": ADVICE_JSON_SCHEMA
-        }
-    }
+            payload = {
+                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.2,
+                    "maxOutputTokens": 2048,
+                    "responseMimeType": "application/json",
+                    "responseSchema": ADVICE_JSON_SCHEMA
+                }
+            }
 
-    try:
-        async with httpx.AsyncClient(timeout=35.0) as client:
-            resp = await client.post(gemini_url, json=payload)
-            res_json = resp.json()
+            with httpx.Client(timeout=35.0) as client:
+                resp = client.post(gemini_url, json=payload)
+                res_json = resp.json()
 
-        if resp.status_code == 429 or ("error" in res_json and "quota" in res_json["error"].get("message", "").lower()):[cite: 1]
-            raise HTTPException(
-                status_code=429,[cite: 1]
-                detail="⚠️ Hạn mức gọi AI trong phút này đã đạt giới hạn. Vui lòng đợi 30 giây rồi thử lại."[cite: 1]
-            )
+            if resp.status_code == 429 or ("error" in res_json and "quota" in res_json["error"].get("message", "").lower()):
+                self._set_headers(429)
+                self.wfile.write(json.dumps({"detail": "⚠️ Hạn mức gọi AI trong phút này đã đạt giới hạn. Vui lòng đợi 30 giây rồi thử lại."}).encode('utf-8'))
+                return
 
-        if resp.status_code != 200 or "error" in res_json:
-            err_msg = res_json.get("error", {}).get("message", f"Lỗi Gemini API (Status {resp.status_code})")
-            raise HTTPException(status_code=500, detail=err_msg)
+            if resp.status_code != 200 or "error" in res_json:
+                err_msg = res_json.get("error", {}).get("message", f"Lỗi Gemini API (Status {resp.status_code})")
+                self._set_headers(500)
+                self.wfile.write(json.dumps({"detail": err_msg}).encode('utf-8'))
+                return
 
-        raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"].strip()[cite: 1]
-        advice = httpx.Response(200, text=raw_text).json()
+            raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
+            advice = json.loads(raw_text)
 
-        result_payload = {"metrics": metrics, "advice": advice}[cite: 1]
+            result_payload = {"metrics": metrics, "advice": advice}
 
-        if len(ANALYSIS_CACHE) >= MAX_CACHE_ENTRIES:
-            ANALYSIS_CACHE.clear()
-        ANALYSIS_CACHE[sym] = (result_payload, time.time())[cite: 1]
+            if len(ANALYSIS_CACHE) >= MAX_CACHE_ENTRIES:
+                ANALYSIS_CACHE.clear()
+            ANALYSIS_CACHE[sym] = (result_payload, time.time())
 
-        return result_payload[cite: 1]
+            self._set_headers(200)
+            self.wfile.write(json.dumps(result_payload).encode('utf-8'))
 
-    except HTTPException:
-        raise
-    except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="AI phản hồi quá lâu (Timeout). Vui lòng thử lại sau giây lát.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Lỗi xử lý hệ thống: {str(e)}")
+        except Exception as e:
+            self._set_headers(500)
+            self.wfile.write(json.dumps({"detail": f"Lỗi xử lý hệ thống: {str(e)}"}).encode('utf-8'))
