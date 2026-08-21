@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import httpx
 
-app = FastAPI(title="VN Stock Trading Pro Advisory Engine", version="3.1.0")
+app = FastAPI(title="VN Stock Trading Pro Advisory Engine", version="3.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -442,7 +442,7 @@ async def daily_market_screener():
 @app.post("/")
 async def analyze_stock(req: StockRequest):
     sym = req.symbol.upper().strip()
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")[cite: 1]
     if not api_key:
         raise HTTPException(
             status_code=500,
@@ -451,43 +451,43 @@ async def analyze_stock(req: StockRequest):
 
     now = time.time()
     if sym in ANALYSIS_CACHE:
-        cached_data, cached_time = ANALYSIS_CACHE[sym]
+        cached_data, cached_time = ANALYSIS_CACHE[sym][cite: 1]
         if now - cached_time < CACHE_TTL:
             return cached_data
 
     # 1. Truy xuất dữ liệu
     try:
-        ticker = f"{sym}.VN"
-        stock = yf.Ticker(ticker)
-        df = stock.history(period="6mo", interval="1d")
-        if df is None or df.empty or len(df) < 20:
+        ticker = f"{sym}.VN"[cite: 1]
+        stock = yf.Ticker(ticker)[cite: 1]
+        df = stock.history(period="6mo", interval="1d")[cite: 1]
+        if df is None or df.empty or len(df) < 20:[cite: 1]
             raise HTTPException(
                 status_code=404,
-                detail=f"Không tìm thấy dữ liệu cho mã '{sym}'. Vui lòng kiểm tra lại mã cổ phiếu."
+                detail=f"Không tìm thấy dữ liệu cho mã '{sym}'. Vui lòng kiểm tra lại mã cổ phiếu."[cite: 1]
             )
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Lỗi truy xuất dữ liệu: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Lỗi truy xuất dữ liệu: {str(e)}")[cite: 1]
 
     # 2. Tính toán các chỉ báo kỹ thuật cốt lõi
-    df["SMA20"] = df["Close"].rolling(window=20).mean()
-    df["SMA50"] = df["Close"].rolling(window=50).mean()
+    df["SMA20"] = df["Close"].rolling(window=20).mean()[cite: 1]
+    df["SMA50"] = df["Close"].rolling(window=50).mean()[cite: 1]
     df["RSI"] = calculate_rsi_wilder(df["Close"], period=14)
     df["ATR"] = calculate_atr(df, period=14)
 
-    latest = df.iloc[-1]
-    prev = df.iloc[-2]
-    curr_price = float(latest["Close"])
-    change = curr_price - float(prev["Close"])
-    pct_change = (change / float(prev["Close"])) * 100
+    latest = df.iloc[-1][cite: 1]
+    prev = df.iloc[-2][cite: 1]
+    curr_price = float(latest["Close"])[cite: 1]
+    change = curr_price - float(prev["Close"])[cite: 1]
+    pct_change = (change / float(prev["Close"])) * 100[cite: 1]
 
-    recent_10 = df.tail(10)
-    history_dates = [pd.to_datetime(d).strftime("%d/%m") for d in recent_10.index]
-    history_prices = [round(float(p), 0) for p in recent_10["Close"]]
+    recent_10 = df.tail(10)[cite: 1]
+    history_dates = [pd.to_datetime(d).strftime("%d/%m") for d in recent_10.index][cite: 1]
+    history_prices = [round(float(p), 0) for p in recent_10["Close"]][cite: 1]
 
-    last_trade_date = pd.to_datetime(recent_10.index[-1]).to_pydatetime()
-    future_dates = get_next_trading_days(last_trade_date, count=5)
+    last_trade_date = pd.to_datetime(recent_10.index[-1]).to_pydatetime()[cite: 1]
+    future_dates = get_next_trading_days(last_trade_date, count=5)[cite: 1]
 
     # 3. Tính toán các Module Add-on
     macro_info = fetch_vnindex_macro()
@@ -524,8 +524,8 @@ async def analyze_stock(req: StockRequest):
         "realtime_alerts": realtime_alerts
     }
 
-    # 4. Gửi Prompt sang Gemini Flash với Structured Output
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    # 4. Gửi Prompt sang Gemini 3.6 Flash với Structured Output
+    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"[cite: 1]
     
     prompt = f"""
 Bạn là Chuyên gia Tư vấn Đầu tư Chứng khoán cấp cao tại thị trường Việt Nam. Phân tích mã {sym}:
@@ -541,10 +541,10 @@ Hãy kết hợp bối cảnh dòng tiền lớn (Cá mập gom hay Bull trap), 
 """
 
     payload = {
-        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],[cite: 1]
         "generationConfig": {
             "temperature": 0.2,
-            "maxOutputTokens": 2048,
+            "maxOutputTokens": 2048,[cite: 1]
             "responseMimeType": "application/json",
             "responseSchema": ADVICE_JSON_SCHEMA
         }
@@ -555,26 +555,26 @@ Hãy kết hợp bối cảnh dòng tiền lớn (Cá mập gom hay Bull trap), 
             resp = await client.post(gemini_url, json=payload)
             res_json = resp.json()
 
-        if resp.status_code == 429 or ("error" in res_json and "quota" in res_json["error"].get("message", "").lower()):
+        if resp.status_code == 429 or ("error" in res_json and "quota" in res_json["error"].get("message", "").lower()):[cite: 1]
             raise HTTPException(
-                status_code=429,
-                detail="⚠️ Hạn mức gọi AI trong phút này đã đạt giới hạn. Vui lòng đợi 30 giây rồi thử lại."
+                status_code=429,[cite: 1]
+                detail="⚠️ Hạn mức gọi AI trong phút này đã đạt giới hạn. Vui lòng đợi 30 giây rồi thử lại."[cite: 1]
             )
 
         if resp.status_code != 200 or "error" in res_json:
             err_msg = res_json.get("error", {}).get("message", f"Lỗi Gemini API (Status {resp.status_code})")
             raise HTTPException(status_code=500, detail=err_msg)
 
-        raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
+        raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"].strip()[cite: 1]
         advice = httpx.Response(200, text=raw_text).json()
 
-        result_payload = {"metrics": metrics, "advice": advice}
+        result_payload = {"metrics": metrics, "advice": advice}[cite: 1]
 
         if len(ANALYSIS_CACHE) >= MAX_CACHE_ENTRIES:
             ANALYSIS_CACHE.clear()
-        ANALYSIS_CACHE[sym] = (result_payload, time.time())
+        ANALYSIS_CACHE[sym] = (result_payload, time.time())[cite: 1]
 
-        return result_payload
+        return result_payload[cite: 1]
 
     except HTTPException:
         raise
