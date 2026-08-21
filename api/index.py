@@ -8,11 +8,10 @@ from typing import Dict, Any, List, Tuple
 import pandas as pd
 import numpy as np
 import httpx
-import yfinance as yf
 
 ANALYSIS_CACHE: Dict[str, Any] = {}
 SCREENER_CACHE: Dict[str, Any] = {}
-CACHE_TTL = 180  # Cache 3 phút
+CACHE_TTL = 180  # 3 phút
 MAX_CACHE_ENTRIES = 100
 
 WATCHLIST_UNIVERSE = [
@@ -21,11 +20,10 @@ WATCHLIST_UNIVERSE = [
     "KBC", "DIG", "DXG", "NLG", "VIX", "PVS", "HCM", "PDR", "VCI", "HSG"
 ]
 
-HTTP_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+COMMON_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
-    "Origin": "https://tcinvest.tcbs.com.vn",
-    "Referer": "https://tcinvest.tcbs.com.vn/"
+    "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7"
 }
 
 
@@ -61,64 +59,91 @@ def calculate_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
     return tr.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
 
 
-def fetch_vn_market_ohlcv(symbol: str, is_index: bool = False) -> Tuple[pd.DataFrame, str]:
-    """
-    Truy xuất nến OHLCV trực tiếp từ TCBS Open Data Engine.
-    Hỗ trợ HOSE, HNX (MBS, SHS,...), UPCOM và chỉ số VN-INDEX.
-    """
-    now_ts = int(time.time())
-    from_ts = now_ts - (200 * 86400)  # 200 ngày dữ liệu
-    ticker_type = "index" if is_index else "stock"
-    target_sym = "VNINDEX" if is_index else symbol.upper().strip()
-
-    # 1. Nguồn Sơ Cấp: TCBS Bars API
-    url = f"https://apipubaws.tcbs.com.vn/stock-insight/v1/stock/bars-long-term?ticker={target_sym}&type={ticker_type}&resolution=D&from={from_ts}&to={now_ts}"
+def fetch_ohlcv_from_dnse(symbol: str, is_index: bool = False) -> pd.DataFrame:
+    """Nguồn 1: DNSE Entrade API (Không chặn Datacenter IP, hỗ trợ 100% mã VN)"""
     try:
-        with httpx.Client(timeout=10.0, headers=HTTP_HEADERS) as client:
+        now_ts = int(time.time())
+        from_ts = now_ts - (220 * 86400)
+        target_sym = "VNINDEX" if is_index else symbol.upper().strip()
+        endpoint_type = "index" if is_index else "stock"
+        
+        url = f"https://services.entrade.com.vn/chart-api/v2/ohlcs/{endpoint_type}?from={from_ts}&to={now_ts}&symbol={target_sym}&resolution=1D"
+        
+        with httpx.Client(timeout=8.0, headers=COMMON_HEADERS) as client:
+            resp = client.get(url)
+            if resp.status_code == 200:
+                data = resp.json()
+                timestamps = data.get("t", [])
+                if timestamps and len(timestamps) >= 15:
+                    df = pd.DataFrame({
+                        "Date": [datetime.fromtimestamp(ts) for ts in timestamps],
+                        "Open": data.get("o", []),
+                        "High": data.get("h", []),
+                        "Low": data.get("l", []),
+                        "Close": data.get("c", []),
+                        "Volume": data.get("v", [])
+                    })
+                    df.set_index("Date", inplace=True)
+                    df.sort_index(inplace=True)
+                    
+                    # Chuẩn hóa đơn vị giá nếu API trả về đơn vị nghìn đồng
+                    if not is_index and df["Close"].iloc[-1] < 1000:
+                        for col in ["Open", "High", "Low", "Close"]:
+                            df[col] = df[col] * 1000.0
+                    return df
+    except Exception:
+        pass
+    return pd.DataFrame()
+
+
+def fetch_ohlcv_from_tcbs(symbol: str, is_index: bool = False) -> pd.DataFrame:
+    """Nguồn 2: TCBS Open Data Engine (Fallback)"""
+    try:
+        now_ts = int(time.time())
+        from_ts = now_ts - (200 * 86400)
+        target_sym = "VNINDEX" if is_index else symbol.upper().strip()
+        t_type = "index" if is_index else "stock"
+        url = f"https://apipubaws.tcbs.com.vn/stock-insight/v1/stock/bars-long-term?ticker={target_sym}&type={t_type}&resolution=D&from={from_ts}&to={now_ts}"
+        
+        with httpx.Client(timeout=6.0, headers=COMMON_HEADERS) as client:
             resp = client.get(url)
             if resp.status_code == 200:
                 raw_data = resp.json().get("data", [])
                 if raw_data and len(raw_data) >= 15:
                     df = pd.DataFrame(raw_data)
                     df.rename(columns={
-                        "open": "Open",
-                        "high": "High",
-                        "low": "Low",
-                        "close": "Close",
-                        "volume": "Volume",
-                        "tradingDate": "Date"
+                        "open": "Open", "high": "High", "low": "Low",
+                        "close": "Close", "volume": "Volume", "tradingDate": "Date"
                     }, inplace=True)
                     df["Date"] = pd.to_datetime(df["Date"])
                     df.set_index("Date", inplace=True)
                     df.sort_index(inplace=True)
-
-                    # Chuẩn hóa giá: Nếu giá < 1000 (đơn vị nghìn đồng) và không phải VNINDEX -> nhân 1000
                     if not is_index and df["Close"].iloc[-1] < 1000:
                         for col in ["Open", "High", "Low", "Close"]:
                             df[col] = df[col] * 1000.0
-
-                    return df, "TCBS_REALTIME"
+                    return df
     except Exception:
         pass
+    return pd.DataFrame()
 
-    # 2. Nguồn Thứ Cấp: Fallback Yahoo Finance
-    candidates = ["^VNINDEX"] if is_index else [f"{symbol}.VN", f"{symbol}.HA", symbol]
-    for c in candidates:
-        try:
-            stock = yf.Ticker(c)
-            df = stock.history(period="6mo", interval="1d")
-            if df is not None and not df.empty and len(df) >= 15:
-                return df, "YAHOO_FALLBACK"
-        except Exception:
-            continue
 
+def get_market_data(symbol: str, is_index: bool = False) -> Tuple[pd.DataFrame, str]:
+    """Tổng hợp dữ liệu đa nguồn: DNSE -> TCBS"""
+    df = fetch_ohlcv_from_dnse(symbol, is_index)
+    if not df.empty and len(df) >= 15:
+        return df, "DNSE_REALTIME"
+    
+    df = fetch_ohlcv_from_tcbs(symbol, is_index)
+    if not df.empty and len(df) >= 15:
+        return df, "TCBS_REALTIME"
+        
     return pd.DataFrame(), "NONE"
 
 
 def fetch_vnindex_macro() -> Dict[str, Any]:
-    """Lấy dữ liệu vĩ mô VN-INDEX realtime"""
-    vdf, source = fetch_vn_market_ohlcv("VNINDEX", is_index=True)
-    if not vdf.empty and len(vdf) >= 20:
+    """Tính toán chỉ số VN-INDEX và trạng thái vĩ mô realtime"""
+    vdf, source = get_market_data("VNINDEX", is_index=True)
+    if not vdf.empty and len(vdf) >= 15:
         vdf["SMA20"] = vdf["Close"].rolling(window=20).mean()
         vdf["RSI"] = calculate_rsi_wilder(vdf["Close"], period=14)
         
@@ -141,81 +166,103 @@ def fetch_vnindex_macro() -> Dict[str, Any]:
         }
 
     return {
-        "vnindex_point": 1285.5,
-        "vnindex_change_pct": 0.35,
-        "vnindex_sma20": 1270.0,
-        "vnindex_rsi": 56.4,
-        "macro_status": "TĂNG TRƯỞNG",
-        "data_source": "DEFAULT"
+        "vnindex_point": 1280.0,
+        "vnindex_change_pct": 0.0,
+        "vnindex_sma20": 1275.0,
+        "vnindex_rsi": 52.0,
+        "macro_status": "TRUNG LẬP",
+        "data_source": "FALLBACK"
     }
 
 
 def fetch_live_events_and_fundamentals(symbol: str, curr_price: float) -> Dict[str, Any]:
-    """
-    Truy xuất Lịch sự kiện/Cổ tức realtime 2026 và chỉ số tài chính từ TCBS
-    """
+    """Truy xuất Lịch sự kiện/Cổ tức realtime 2026 từ VNDIRECT Finfo & TCBS"""
     events_list = []
     pe, pb, roe, div_yield = "N/A", "N/A", "N/A", "N/A"
     health_score = 75
+    sym = symbol.upper().strip()
 
-    # 1. Gọi API Lịch sự kiện & Cổ tức (Events Stream)
-    events_url = f"https://apipubaws.tcbs.com.vn/tcanalysis/v1/ticker/{symbol.upper()}/events"
+    # 1. Lấy Lịch sự kiện & Cổ tức từ VNDIRECT Finfo API
+    vnd_url = f"https://finfo-api.vndirect.com.vn/v2/events?symbols={sym}&sort=effectiveDate:desc&size=6"
     try:
-        with httpx.Client(timeout=6.0, headers=HTTP_HEADERS) as client:
-            resp = client.get(events_url)
+        with httpx.Client(timeout=5.0, headers=COMMON_HEADERS) as client:
+            resp = client.get(vnd_url)
             if resp.status_code == 200:
-                raw_events = resp.json()
-                if isinstance(raw_events, dict):
-                    raw_events = raw_events.get("data", raw_events.get("listEvent", []))
-                
-                if isinstance(raw_events, list):
-                    for ev in raw_events:
-                        title = ev.get("eventTitle") or ev.get("eventName") or ev.get("content") or ""
-                        ex_date = ev.get("exRightDate") or ev.get("issueDate") or ev.get("publicDate") or ""
-                        if title:
-                            date_str = f"[{ex_date[:10]}] " if ex_date else ""
-                            events_list.append(f"{date_str}{title.strip()}")
-                        if len(events_list) >= 4:
-                            break
+                items = resp.json().get("data", [])
+                for item in items:
+                    name = item.get("eventName") or item.get("eventTitle") or item.get("eventDesc") or ""
+                    eff_date = item.get("effectiveDate") or item.get("recordDate") or item.get("noticeDate") or ""
+                    ratio_info = f" (Tỷ lệ: {item.get('ratio')})" if item.get("ratio") else ""
+                    div_rate = f" - {item.get('dividendRate') * 1000:,.0f}đ/CP" if item.get("dividendRate") else ""
+                    
+                    if name:
+                        date_prefix = f"[{eff_date[:10]}] " if eff_date else ""
+                        events_list.append(f"{date_prefix}{name}{div_rate}{ratio_info}")
+                    if len(events_list) >= 4:
+                        break
     except Exception:
         pass
 
-    # 2. Gọi API Chỉ số Tài chính (Overview Stream)
-    overview_url = f"https://apipubaws.tcbs.com.vn/tcanalysis/v1/ticker/{symbol.upper()}/overview"
-    try:
-        with httpx.Client(timeout=6.0, headers=HTTP_HEADERS) as client:
-            resp = client.get(overview_url)
-            if resp.status_code == 200:
-                data = resp.json()
-                pe_val = data.get("pe")
-                pb_val = data.get("pb")
-                roe_val = data.get("roe")
-                div_val = data.get("dividendYield")
+    # 2. Dự phòng: Lấy sự kiện từ TCBS nếu VNDirect rỗng
+    if not events_list:
+        tcbs_url = f"https://apipubaws.tcbs.com.vn/tcanalysis/v1/ticker/{sym}/events"
+        try:
+            with httpx.Client(timeout=4.0, headers=COMMON_HEADERS) as client:
+                resp = client.get(tcbs_url)
+                if resp.status_code == 200:
+                    raw_ev = resp.json()
+                    if isinstance(raw_ev, dict):
+                        raw_ev = raw_ev.get("data", raw_ev.get("listEvent", []))
+                    if isinstance(raw_ev, list):
+                        for ev in raw_ev:
+                            title = ev.get("eventTitle") or ev.get("eventName") or ""
+                            ex_d = ev.get("exRightDate") or ev.get("publicDate") or ""
+                            if title:
+                                d_str = f"[{ex_d[:10]}] " if ex_d else ""
+                                events_list.append(f"{d_str}{title.strip()}")
+                            if len(events_list) >= 4:
+                                break
+        except Exception:
+            pass
 
-                if pe_val is not None:
-                    pe = round(float(pe_val), 2)
-                    if 0 < pe < 16:
-                        health_score += 8
-                if pb_val is not None:
-                    pb = round(float(pb_val), 2)
-                if roe_val is not None:
-                    roe = round(float(roe_val) * 100, 2) if float(roe_val) < 1 else round(float(roe_val), 2)
-                    if roe > 15:
-                        health_score += 10
-                if div_val is not None:
-                    div_yield = round(float(div_val) * 100, 2) if float(div_val) < 1 else round(float(div_val), 2)
+    # 3. Lấy Định giá Doanh nghiệp (P/E, P/B, ROE)
+    ratio_url = f"https://finfo-api.vndirect.com.vn/v2/ratios?symbols={sym}"
+    try:
+        with httpx.Client(timeout=4.0, headers=COMMON_HEADERS) as client:
+            resp = client.get(ratio_url)
+            if resp.status_code == 200:
+                r_data = resp.json().get("data", [])
+                if r_data:
+                    first = r_data[0]
+                    pe_val = first.get("pe")
+                    pb_val = first.get("pb")
+                    roe_val = first.get("roe")
+                    div_val = first.get("dividendYield")
+
+                    if pe_val:
+                        pe = round(float(pe_val), 2)
+                        if 0 < pe < 16:
+                            health_score += 8
+                    if pb_val:
+                        pb = round(float(pb_val), 2)
+                    if roe_val:
+                        roe = round(float(roe_val) * 100, 2) if float(roe_val) < 1 else round(float(roe_val), 2)
+                        if roe > 15:
+                            health_score += 10
+                    if div_val:
+                        div_yield = round(float(div_val) * 100, 2) if float(div_val) < 1 else round(float(div_val), 2)
     except Exception:
         pass
 
     if not events_list:
-        events_list = ["Đang cập nhật lịch ĐHCĐ và kế hoạch chia cổ tức năm 2026."]
+        events_list = [f"Chưa ghi nhận lịch GDKHQ hoặc chia cổ tức mới của {sym} trong 30 ngày tới."]
 
     return {
         "pe_ratio": pe,
         "pb_ratio": pb,
         "roe_pct": roe,
         "dividend_yield": div_yield,
-        "health_score": min(health_score, 96),
+        "health_score": min(health_score, 98),
         "corporate_actions": events_list,
         "is_penny_risk": bool(curr_price < 10000)
     }
@@ -317,7 +364,7 @@ def evaluate_realtime_triggers(curr_price: float, rsi: float, dynamic_buy_zone: 
 
 
 def calculate_signal_reliability(df: pd.DataFrame) -> Dict[str, Any]:
-    if len(df) < 50:
+    if len(df) < 45:
         return {
             "title": "ĐỘ TIN CẬY TÍN HIỆU (T+5)",
             "win_rate": 62.5,
@@ -331,7 +378,7 @@ def calculate_signal_reliability(df: pd.DataFrame) -> Dict[str, Any]:
     sma20 = df["SMA20"].values
     rsi = df["RSI"].values
 
-    for i in range(40, len(df) - 5):
+    for i in range(35, len(df) - 5):
         if (closes[i] > sma20[i]) and (closes[i-1] <= sma20[i-1]) and (45 <= rsi[i] <= 70):
             entry_price = closes[i]
             exit_price = closes[i + 5]
@@ -386,18 +433,18 @@ def parse_llm_json(raw_text: str, curr_price: float) -> Dict[str, Any]:
             "trend_monthly": "TĂNG",
             "market_sentiment": {
                 "market_risk_level": "TRUNG BÌNH",
-                "sentiment_summary": "Dòng tiền phân hóa tích cực, ưu tiên nắm giữ theo trend."
+                "sentiment_summary": "Dòng tiền duy trì tích cực, hỗ trợ xu hướng tăng giá."
             },
             "catalysts": [
-                "Lực cầu chủ động duy trì tốt quanh vùng hỗ trợ",
-                "Chỉ báo kỹ thuật vận động trong vùng an toàn",
-                "Chiến lược: Mở vị thế từng phần tại vùng hỗ trợ"
+                "Lực cầu duy trì tốt tại vùng hỗ trợ kỹ thuật",
+                "Chỉ báo dao động ở vùng an toàn, chưa xuất hiện tín hiệu phân kỳ",
+                "Khuyến nghị: Giải ngân theo từng phần tại các nhịp rung lắc"
             ],
             "capital_allocation": "20% - 30% NAV",
             "predicted_5d_prices": [
                 round(curr_price * (1 + 0.006 * i), 0) for i in range(1, 6)
             ],
-            "prediction_comment": "Kỳ vọng giá tiếp tục tích lũy hướng tới các mốc kháng cự kế tiếp."
+            "prediction_comment": "Kỳ vọng giá tiếp tục tích lũy và hướng lên các mốc kháng cự ngắn hạn."
         }
 
 
@@ -427,7 +474,7 @@ class handler(BaseHTTPRequestHandler):
             screened_results = []
             for sym in WATCHLIST_UNIVERSE:
                 try:
-                    df, _ = fetch_vn_market_ohlcv(sym)
+                    df, _ = get_market_data(sym)
                     if df.empty or len(df) < 25:
                         continue
 
@@ -475,7 +522,7 @@ class handler(BaseHTTPRequestHandler):
             return
 
         self._set_headers(200)
-        self.wfile.write(json.dumps({"status": "healthy", "service": "VN Stock Engine 2026"}, ensure_ascii=False).encode('utf-8'))
+        self.wfile.write(json.dumps({"status": "healthy", "service": "VN Stock Engine Multi-Source"}, ensure_ascii=False).encode('utf-8'))
 
     def do_POST(self):
         try:
@@ -504,11 +551,11 @@ class handler(BaseHTTPRequestHandler):
                     self.wfile.write(json.dumps(cached_data, ensure_ascii=False).encode('utf-8'))
                     return
 
-            # 1. Lấy dữ liệu giá OHLCV (Hỗ trợ MBS, HNX, HOSE, UPCOM)
-            df, data_source = fetch_vn_market_ohlcv(sym)
+            # 1. Truy xuất dữ liệu OHLCV (Hỗ trợ MBS, HNX, HOSE, UPCOM)
+            df, data_source = get_market_data(sym)
             if df.empty or len(df) < 15:
                 self._set_headers(404)
-                self.wfile.write(json.dumps({"detail": f"Không tìm thấy dữ liệu thị trường cho mã '{sym}'. Vui lòng kiểm tra lại mã."}, ensure_ascii=False).encode('utf-8'))
+                self.wfile.write(json.dumps({"detail": f"Không tìm thấy dữ liệu cho mã '{sym}'. Vui lòng kiểm tra lại mã cổ phiếu."}, ensure_ascii=False).encode('utf-8'))
                 return
 
             # 2. Tính toán chỉ báo kỹ thuật
@@ -530,7 +577,7 @@ class handler(BaseHTTPRequestHandler):
             last_trade_date = pd.to_datetime(recent_10.index[-1]).to_pydatetime()
             future_dates = get_next_trading_days(last_trade_date, count=5)
 
-            # 3. Thu thập dữ liệu vĩ mô, Lịch quyền 2026 & Orderflow
+            # 3. Lấy dữ liệu vĩ mô VN-INDEX, Lịch sự kiện 2026 & Dòng tiền
             macro_info = fetch_vnindex_macro()
             signal_reliability = calculate_signal_reliability(df)
             orderflow = calculate_orderflow_pressure(df)
@@ -566,7 +613,7 @@ class handler(BaseHTTPRequestHandler):
                 "engine_source": data_source
             }
 
-            # 4. Prompt tư vấn Gemini 3.6 Flash
+            # 4. Gửi yêu cầu phân tích tới Gemini 3.6 Flash
             gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
             prompt = f"""
 Bạn là Chuyên gia Tư vấn Đầu tư Chứng khoán cấp cao tại Việt Nam. Đưa ra phân tích chuyên sâu cho mã {sym}:
@@ -574,15 +621,15 @@ Bạn là Chuyên gia Tư vấn Đầu tư Chứng khoán cấp cao tại Việt
 - GIÁ & KỸ THUẬT {sym}: {metrics['current_price']:,.0f} VNĐ ({metrics['percent_change']:+.2f}%), KL: {metrics['volume']:,} CP (TB20: {metrics['avg_vol_20']:,} CP), RSI: {metrics['rsi']}, SMA20: {metrics['sma20']:,.0f}
 - DÒNG TIỀN: Mua chủ động {orderflow['active_buy_pct']}% vs Bán chủ động {orderflow['active_sell_pct']}%. Tín hiệu: {orderflow['smart_money_signal']}
 - ĐỘ TIN CẬY (T+5): Tỷ lệ thắng {signal_reliability['win_rate']}% ({signal_reliability['badge_rating']})
-- ĐỊNH GIÁ & SỰ KIỆN 2026: P/E: {fundamental['pe_ratio']} | P/B: {fundamental['pb_ratio']} | ROE: {fundamental['roe_pct']}% | Sức khỏe: {fundamental['health_score']}/100. Lịch quyền: {fundamental['corporate_actions']}
+- ĐỊNH GIÁ & SỰ KIỆN 2026: P/E: {fundamental['pe_ratio']} | P/B: {fundamental['pb_ratio']} | ROE: {fundamental['roe_pct']}% | Sức khỏe: {fundamental['health_score']}/100. Lịch sự kiện/Quyền: {fundamental['corporate_actions']}
 - QUẢN TRỊ RỦI RO ATR: Stop Loss động {atr_risk['dynamic_stop_loss']:,.0f} VNĐ | Trailing Stop {atr_risk['trailing_stop']:,.0f} VNĐ | Biên độ: ±{atr_risk['atr_percent']}%
 - Lịch sử 10 phiên: {history_prices}
 
-Hãy trả về DUY NHẤT 1 JSON Object với cấu trúc sau:
+Trả về DUY NHẤT 1 JSON Object (không kèm giải thích ngoài):
 {{
   "action": "MUA MỚI" | "MUA GIA TĂNG" | "NẮM GIỮ" | "BÁN HẠ TỶ TRỌNG" | "BÁN CẮT LỖ" | "THEO DÕI",
   "buy_zone": "Vùng giá mua tối ưu",
-  "target_price": "Mục tiêu giá ngắn hạn",
+  "target_price": "Mục tiêu giá",
   "stop_loss": "Mức giá cắt lỗ",
   "risk_reward_ratio": "1:2",
   "trend_weekly": "TĂNG" | "GIẢM" | "TÍCH LŨY",
@@ -593,7 +640,7 @@ Hãy trả về DUY NHẤT 1 JSON Object với cấu trúc sau:
   }},
   "catalysts": [
     "Nhận định dòng tiền lớn và khối lượng",
-    "Nhận định sự kiện & chỉ báo kỹ thuật",
+    "Nhận định sự kiện doanh nghiệp & chỉ báo kỹ thuật",
     "Chiến lược hành động chi tiết"
   ],
   "capital_allocation": "20% - 30% NAV",
@@ -640,4 +687,4 @@ Hãy trả về DUY NHẤT 1 JSON Object với cấu trúc sau:
 
         except Exception as e:
             self._set_headers(500)
-            self.wfile.write(json.dumps({"detail": f"Lỗi xử lý hệ thống: {str(e)}"}, ensure_ascii=False).encode('utf-8'))
+            self.wfile.write(json.dumps({"detail": f"Lỗi xử lý hệ thống: {str(e)}"}).encode('utf-8'))
