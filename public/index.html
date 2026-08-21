@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VN Stock AI Advisor & Pro Trading Engine</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0B0E14',
+                            card: '#151A23',
+                            border: '#232A38',
+                            green: '#10B981',
+                            red: '#EF4444',
+                            blue: '#3B82F6',
+                            gold: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0B0E14] text-slate-100 min-h-screen font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="border-b border-[#232A38] bg-[#151A23]/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <i class="fa-solid fa-chart-line text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide text-white">VN STOCK <span class="text-blue-500">AI PRO</span></h1>
+                    <p class="text-xs text-slate-400">Hệ thống Khuyến nghị & Quản trị Rủi ro Tự động</p>
+                </div>
+            </div>
+
+            <!-- Search & Screener Trigger -->
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <div class="relative flex-1 md:w-80">
+                    <input type="text" id="symbolInput" placeholder="Nhập mã CP (VD: HPG, SSI, FPT)..." 
+                           class="w-full bg-[#0B0E14] border border-[#232A38] rounded-lg px-4 py-2 text-sm uppercase placeholder:normal-case focus:outline-none focus:border-blue-500 transition-colors">
+                    <button onclick="analyzeStock()" id="btnSearch" class="absolute right-1 top-1 bottom-1 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-sm font-medium transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Phân tích</span>
+                    </button>
+                </div>
+                <button onclick="fetchDailyScreener()" class="bg-[#232A38] hover:bg-[#2d3648] text-slate-200 border border-slate-700 px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors whitespace-nowrap">
+                    <i class="fa-solid fa-filter text-blue-400"></i>
+                    <span class="hidden sm:inline">Top Tín Hiệu</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- Macro VN-Index Banner -->
+        <section id="macroSection" class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#151A23] border border-[#232A38] rounded-xl p-4">
+            <div class="border-r border-[#232A38] pr-3">
+                <span class="text-xs text-slate-400 block mb-1">Chỉ số VN-INDEX</span>
+                <div class="flex items-baseline gap-2">
+                    <span id="vnindexPoint" class="text-lg font-bold text-white">--</span>
+                    <span id="vnindexChange" class="text-xs font-semibold">--%</span>
+                </div>
+            </div>
+            <div class="border-r border-[#232A38] px-3">
+                <span class="text-xs text-slate-400 block mb-1">RSI Thị trường (14)</span>
+                <div class="flex items-baseline gap-2">
+                    <span id="vnindexRsi" class="text-lg font-bold text-white">--</span>
+                </div>
+            </div>
+            <div class="border-r border-[#232A38] px-3">
+                <span class="text-xs text-slate-400 block mb-1">Trạng thái Vĩ mô</span>
+                <span id="vnindexStatus" class="inline-block text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">ĐANG TẢI...</span>
+            </div>
+            <div class="pl-3">
+                <span class="text-xs text-slate-400 block mb-1">Rủi ro hệ thống</span>
+                <span id="macroRiskLevel" class="text-xs font-bold text-emerald-400">THẤP</span>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden py-16 text-center space-y-4">
+            <div class="inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-slate-400 text-sm animate-pulse">Đang đồng bộ Orderflow, kiểm chứng T+5 & tham vấn AI Engine...</p>
+        </div>
+
+        <!-- Realtime Alert Banner -->
+        <div id="alertBanner" class="hidden rounded-xl border p-4"></div>
+
+        <!-- Analysis Dashboard -->
+        <div id="dashboardContent" class="space-y-6">
+
+            <!-- Primary Metrics & AI Action -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left: Stock Base Metrics -->
+                <div class="bg-[#151A23] border border-[#232A38] rounded-xl p-5 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 id="resSymbol" class="text-2xl font-black tracking-wide text-white">HPG</h2>
+                                <span class="text-xs px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800 font-mono">HOSE</span>
+                            </div>
+                            <p id="resPrice" class="text-3xl font-extrabold text-emerald-400 mt-1">-- VNĐ</p>
+                            <span id="resChange" class="text-xs font-semibold text-emerald-400">--%</span>
+                        </div>
+                        <!-- Signal Reliability Badge -->
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Độ Tin Cậy Tín Hiệu</span>
+                            <span id="resBadgeRating" class="text-xs font-bold text-amber-400 bg-amber-950/60 border border-amber-800/80 px-2 py-0.5 rounded">RẤT CAO ⭐⭐⭐</span>
+                            <span id="resWinRate" class="text-[11px] text-slate-400 block mt-1">Winrate T+5: <strong>--%</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-[#232A38] text-xs">
+                        <div>
+                            <span class="text-slate-400">Khối lượng:</span>
+                            <p id="resVol" class="font-semibold text-slate-200">--</p>
+                        </div>
+                        <div>
+                            <span class="text-slate-400">TB 20 Phiên:</span>
+                            <p id="resAvgVol" class="font-semibold text-slate-200">--</p>
+                        </div>
+                        <div>
+                            <span class="text-slate-400">RSI (14 Wilder):</span>
+                            <p id="resRSI" class="font-semibold text-slate-200">--</p>
+                        </div>
+                        <div>
+                            <span class="text-slate-400">SMA20 / SMA50:</span>
+                            <p id="resSMA" class="font-semibold text-slate-200">-- / --</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middle: AI Recommendation Core -->
+                <div class="bg-[#151A23] border border-[#232A38] rounded-xl p-5 flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
+                                <i class="fa-solid fa-robot text-blue-500"></i> Khuyến Nghị AI
+                            </span>
+                            <span id="resAction" class="px-3 py-1 rounded-md text-xs font-black tracking-wide bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">MUA MỚI</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div class="bg-[#0B0E14] p-2.5 rounded-lg border border-[#232A38]">
+                                <span class="text-slate-400 block text-[11px]">Vùng mua tối ưu</span>
+                                <span id="resBuyZone" class="font-bold text-slate-200">--</span>
+                            </div>
+                            <div class="bg-[#0B0E14] p-2.5 rounded-lg border border-[#232A38]">
+                                <span class="text-slate-400 block text-[11px]">Mục tiêu giá (TP)</span>
+                                <span id="resTarget" class="font-bold text-emerald-400">--</span>
+                            </div>
+                            <div class="bg-[#0B0E14] p-2.5 rounded-lg border border-[#232A38]">
+                                <span class="text-slate-400 block text-[11px]">Cắt lỗ cơ sở</span>
+                                <span id="resStopLoss" class="font-bold text-rose-400">--</span>
+                            </div>
+                            <div class="bg-[#0B0E14] p-2.5 rounded-lg border border-[#232A38]">
+                                <span class="text-slate-400 block text-[11px]">Tỷ trọng đề xuất</span>
+                                <span id="resCapital" class="font-bold text-amber-400">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-[#232A38]">
+                        <span>Tỷ lệ R:R: <strong id="resRR" class="text-slate-200">1:2</strong></span>
+                        <span>Xu hướng Tuần: <strong id="resTrend" class="text-emerald-400">TĂNG</strong></span>
+                    </div>
+                </div>
+
+                <!-- Right: ATR Dynamic Risk Bracket -->
+                <div class="bg-[#151A23] border border-[#232A38] rounded-xl p-5 space-y-3">
+                    <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-amber-500"></i> Quản Trị Rủi Ro Động (ATR)
+                    </span>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between items-center p-2 rounded bg-[#0B0E14] border border-[#232A38]">
+                            <span class="text-slate-400">Biên độ ngày (ATR 14):</span>
+                            <span id="resATR" class="font-bold text-slate-200">-- (±--%)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-rose-950/20 border border-rose-900/40">
+                            <span class="text-slate-300">Stop Loss Động (-2x ATR):</span>
+                            <span id="resDynamicSL" class="font-bold text-rose-400">-- VNĐ</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-amber-950/20 border border-amber-900/40">
+                            <span class="text-slate-300">Chặn Lãi Trailing Stop:</span>
+                            <span id="resTrailingStop" class="font-bold text-amber-400">-- VNĐ</span>
+                        </div>
+                    </div>
+                    <p id="resATRMini" class="text-[11px] text-slate-400 leading-relaxed italic">Biên độ ổn định, phù hợp chiến lược giải ngân lướt sóng T+.</p>
+                </div>
+            </section>
+
+            <!-- Orderflow & Fundamental Modules -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Orderflow Active Buy/Sell -->
+                <div class="bg-[#151A23] border border-[#232A38] rounded-xl p-5 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-money-bill-trend-up text-emerald-500"></i> Dòng Tiền Khớp Lệnh Chủ Động
+                        </span>
+                        <span id="resSmartMoneyAction" class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">CÁ MẬP GOM HÀNG</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-emerald-400" id="resBuyPct">Mua: --%</span>
+                            <span class="text-rose-400" id="resSellPct">Bán: --%</span>
+                        </div>
+                        <div class="w-full bg-rose-900/40 h-3 rounded-full overflow-hidden flex">
+                            <div id="resBuyBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 50%"></div>
+                        </div>
+                        <div class="flex justify-between text-[11px] text-slate-400">
+                            <span id="resBuyVol">-- CP</span>
+                            <span id="resSellVol">-- CP</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-[#232A38]">
+                        <div class="p-2 bg-[#0B0E14] rounded border border-[#232A38]">
+                            <span class="text-slate-400 block text-[10px]">Cá mập gom ròng:</span>
+                            <span id="resSharkVol" class="font-bold text-emerald-400">-- CP</span>
+                        </div>
+                        <div class="p-2 bg-[#0B0E14] rounded border border-[#232A38]">
+                            <span class="text-slate-400 block text-[10px]">Nhỏ lẻ giao dịch ròng:</span>
+                            <span id="resRetailVol" class="font-bold text-slate-300">-- CP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fundamental Health & Corporate Events -->
+                <div class="bg-[#151A23] border border-[#232A38] rounded-xl p-5 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-building text-blue-500"></i> Sức Khỏe Doanh Nghiệp & Lịch Quyền
+                        </span>
+                        <span id="resHealthScore" class="text-xs font-black text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">85/100</span>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                        <div class="p-2 bg-[#0B0E14] rounded border border-[#232A38]">
+                            <span class="text-slate-400 text-[10px] block">P/E</span>
+                            <span id="resPE" class="font-bold text-white">--</span>
+                        </div>
+                        <div class="p-2 bg-[#0B0E14] rounded border border-[#232A38]">
+                            <span class="text-slate-400 text-[10px] block">P/B</span>
+                            <span id="resPB" class="font-bold text-white">--</span>
+                        </div>
+                        <div class="p-2 bg-[#0B0E14] rounded border border-[#232A38]">
+                            <span class="text-slate-400 text-[10px] block">ROE</span>
+                            <span id="resROE" class="font-bold text-emerald-400">--%</span>
+                        </div>
+                        <div class="p-2 bg-[#0B0E14] rounded border border-[#232A38]">
+                            <span class="text-slate-400 text-[10px] block">Cổ tức</span>
+                            <span id="resDiv" class="font-bold text-white">--%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#0B0E14] p-3 rounded-lg border border-[#232A38] space-y-1">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Lịch sự kiện & Cổ tức:</span>
+                        <ul id="resEventsList" class="text-xs text-slate-300 list-disc list-inside space-y-0.5">
+                            <li>Đang cập nhật...</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Catalysts & 5-Day Price Forecast Chart -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Catalysts Commentary -->
+                <div class="bg-[#151A23] border border-[#232A38] rounded-xl p-5 space-y-3">
+                    <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check text-indigo-400"></i> Luận Điểm Đầu Tư
+                    </span>
+                    <ul id="resCatalysts" class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                        <!-- Filled by JS -->
+                    </ul>
+                </div>
+
+                <!-- 5-Day Price Path Chart -->
+                <div class="lg:col-span-2 bg-[#151A23] border border-[#232A38] rounded-xl p-5 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-area text-blue-400"></i> Dự Báo Xu Hướng 5 Phiên Kế Tiếp (T+5)
+                        </span>
+                        <span class="text-[11px] text-slate-400">Đơn vị: VNĐ</span>
+                    </div>
+                    <div class="h-56 relative w-full">
+                        <canvas id="predictionChart"></canvas>
+                    </div>
+                    <p id="resPredictionComment" class="text-xs text-slate-300 italic bg-[#0B0E14] p-2.5 rounded-lg border border-[#232A38]"></p>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Screener Modal -->
+        <div id="screenerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-[#151A23] border border-[#232A38] rounded-xl max-w-3xl w-full p-6 space-y-4 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-[#232A38] pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-bullseye text-blue-500"></i>
+                        <h3 class="text-md font-bold text-white">Top 5 Cổ Phiếu Tín Hiệu Mạnh Sau ATC</h3>
+                    </div>
+                    <button onclick="closeScreenerModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div id="screenerContent" class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-slate-400 bg-[#0B0E14] border-b border-[#232A38]">
+                            <tr>
+                                <th class="p-2.5">MÃ</th>
+                                <th class="p-2.5">GIÁ</th>
+                                <th class="p-2.5">% TĂNG</th>
+                                <th class="p-2.5">KL / TB20</th>
+                                <th class="p-2.5">RSI</th>
+                                <th class="p-2.5">TÍN HIỆU CÁ MẬP</th>
+                                <th class="p-2.5">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="screenerTableBody" class="divide-y divide-[#232A38]">
+                            <!-- Screener items -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let predictionChartInstance = null;
+
+        // Auto load initial stock
+        window.addEventListener('DOMContentLoaded', () => {
+            analyzeStock('HPG');
+        });
+
+        async function analyzeStock(customSym = null) {
+            const sym = customSym || document.getElementById('symbolInput').value.trim();
+            if (!sym) return;
+
+            // UI Toggle
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('dashboardContent').classList.add('opacity-30', 'pointer-events-none');
+            document.getElementById('alertBanner').classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol: sym })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Không thể phân tích mã này');
+                }
+
+                const data = await response.json();
+                renderDashboard(data);
+
+            } catch (err) {
+                alert('Lỗi: ' + err.message);
+            } finally {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('opacity-30', 'pointer-events-none');
+            }
+        }
+
+        function renderDashboard(data) {
+            const m = data.metrics;
+            const adv = data.advice;
+
+            // 1. Macro Section
+            document.getElementById('vnindexPoint').textContent = m.macro_vnindex.vnindex_point.toLocaleString();
+            const chgEl = document.getElementById('vnindexChange');
+            chgEl.textContent = (m.macro_vnindex.vnindex_change_pct >= 0 ? '+' : '') + m.macro_vnindex.vnindex_change_pct + '%';
+            chgEl.className = m.macro_vnindex.vnindex_change_pct >= 0 ? 'text-xs font-semibold text-emerald-400' : 'text-xs font-semibold text-rose-400';
+            document.getElementById('vnindexRsi').textContent = m.macro_vnindex.vnindex_rsi;
+            document.getElementById('vnindexStatus').textContent = m.macro_vnindex.macro_status;
+            document.getElementById('macroRiskLevel').textContent = adv.market_sentiment.market_risk_level;
+
+            // 2. Alert Banner
+            if (m.realtime_alerts && m.realtime_alerts.has_active_alert) {
+                const banner = document.getElementById('alertBanner');
+                banner.className = 'rounded-xl border p-3 bg-amber-950/30 border-amber-500/40 text-amber-300 text-xs flex items-center gap-2';
+                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i> <span>${m.realtime_alerts.alert_messages.join(' | ')}</span>`;
+                banner.classList.remove('hidden');
+            }
+
+            // 3. Stock Core Metrics
+            document.getElementById('resSymbol').textContent = m.symbol;
+            document.getElementById('resPrice').textContent = m.current_price.toLocaleString() + ' VNĐ';
+            const sChg = document.getElementById('resChange');
+            sChg.textContent = (m.percent_change >= 0 ? '+' : '') + m.percent_change.toFixed(2) + '%';
+            sChg.className = m.percent_change >= 0 ? 'text-xs font-semibold text-emerald-400' : 'text-xs font-semibold text-rose-400';
+
+            document.getElementById('resBadgeRating').textContent = m.signal_reliability.badge_rating;
+            document.getElementById('resWinRate').innerHTML = `Winrate (T+5): <strong>${m.signal_reliability.win_rate}%</strong>`;
+            document.getElementById('resVol').textContent = m.volume.toLocaleString() + ' CP';
+            document.getElementById('resAvgVol').textContent = m.avg_vol_20.toLocaleString() + ' CP';
+            document.getElementById('resRSI').textContent = m.rsi;
+            document.getElementById('resSMA').textContent = `${m.sma20.toLocaleString()} / ${m.sma50.toLocaleString()}`;
+
+            // 4. AI Recommendation Core
+            document.getElementById('resAction').textContent = adv.action;
+            document.getElementById('resBuyZone').textContent = adv.buy_zone;
+            document.getElementById('resTarget').textContent = adv.target_price;
+            document.getElementById('resStopLoss').textContent = adv.stop_loss;
+            document.getElementById('resCapital').textContent = adv.capital_allocation;
+            document.getElementById('resRR').textContent = adv.risk_reward_ratio;
+            document.getElementById('resTrend').textContent = adv.trend_weekly;
+
+            // 5. ATR Dynamic Risk
+            document.getElementById('resATR').textContent = `${m.atr_risk_management.atr_14.toLocaleString()} VNĐ (±${m.atr_risk_management.atr_percent}%)`;
+            document.getElementById('resDynamicSL').textContent = `${m.atr_risk_management.dynamic_stop_loss.toLocaleString()} VNĐ`;
+            document.getElementById('resTrailingStop').textContent = `${m.atr_risk_management.trailing_stop.toLocaleString()} VNĐ`;
+            document.getElementById('resATRMini').textContent = m.atr_risk_management.risk_summary;
+
+            // 6. Orderflow
+            const of = m.orderflow_pressure;
+            document.getElementById('resSmartMoneyAction').textContent = of.smart_money_signal;
+            document.getElementById('resBuyPct').textContent = `Mua: ${of.active_buy_pct}%`;
+            document.getElementById('resSellPct').textContent = `Bán: ${of.active_sell_pct}%`;
+            document.getElementById('resBuyBar').style.width = `${of.active_buy_pct}%`;
+            document.getElementById('resBuyVol').textContent = `${of.active_buy_volume.toLocaleString()} CP`;
+            document.getElementById('resSellVol').textContent = `${of.active_sell_volume.toLocaleString()} CP`;
+            document.getElementById('resSharkVol').textContent = `${of.tier_breakdown.shark_net_volume >= 0 ? '+' : ''}${of.tier_breakdown.shark_net_volume.toLocaleString()} CP`;
+            document.getElementById('resRetailVol').textContent = `${of.tier_breakdown.retail_net_volume >= 0 ? '+' : ''}${of.tier_breakdown.retail_net_volume.toLocaleString()} CP`;
+
+            // 7. Fundamental & Events
+            const fa = m.fundamental_overlay;
+            document.getElementById('resHealthScore').textContent = `${fa.health_score}/100`;
+            document.getElementById('resPE').textContent = fa.pe_ratio;
+            document.getElementById('resPB').textContent = fa.pb_ratio;
+            document.getElementById('resROE').textContent = `${fa.roe_pct}%`;
+            document.getElementById('resDiv').textContent = `${fa.dividend_yield}%`;
+            
+            const eventList = document.getElementById('resEventsList');
+            eventList.innerHTML = '';
+            fa.corporate_actions.forEach(ev => {
+                const li = document.createElement('li');
+                li.textContent = ev;
+                eventList.appendChild(li);
+            });
+
+            // 8. Catalysts
+            const catList = document.getElementById('resCatalysts');
+            catList.innerHTML = '';
+            adv.catalysts.forEach(c => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start gap-2';
+                li.innerHTML = `<i class="fa-solid fa-check text-blue-500 mt-1 text-[10px]"></i> <span>${c}</span>`;
+                catList.appendChild(li);
+            });
+
+            // 9. Render Chart
+            document.getElementById('resPredictionComment').textContent = `💬 ${adv.prediction_comment}`;
+            renderPredictionChart(m.history_dates, m.history_prices, m.future_dates, adv.predicted_5d_prices);
+        }
+
+        function renderPredictionChart(histDates, histPrices, futDates, futPrices) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            if (predictionChartInstance) {
+                predictionChartInstance.destroy();
+            }
+
+            const allLabels = [...histDates, ...futDates];
+            const histData = [...histPrices, ...new Array(futDates.length).fill(null)];
+            
+            // Connect last historical price with future line
+            const lastHistPrice = histPrices[histPrices.length - 1];
+            const futureData = [...new Array(histDates.length - 1).fill(null), lastHistPrice, ...futPrices];
+
+            predictionChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: allLabels,
+                    datasets: [
+                        {
+                            label: 'Lịch sử giá',
+                            data: histData,
+                            borderColor: '#94A3B8',
+                            backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Dự báo AI (T+5)',
+                            data: futureData,
+                            borderColor: '#3B82F6',
+                            borderDash: [5, 5],
+                            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#3B82F6'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { color: '#94A3B8', font: { size: 10 } } },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { grid: { color: '#232A38' }, ticks: { color: '#94A3B8', font: { size: 10 } } },
+                        y: { grid: { color: '#232A38' }, ticks: { color: '#94A3B8', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        async function fetchDailyScreener() {
+            const modal = document.getElementById('screenerModal');
+            const tbody = document.getElementById('screenerTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-400">Đang quét toàn thị trường sau ATC...</td></tr>';
+            modal.classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/screener');
+                const data = await res.json();
+                
+                tbody.innerHTML = '';
+                data.top_picks.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-[#0B0E14] transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-2.5 font-bold text-white">${p.symbol}</td>
+                        <td class="p-2.5">${p.price.toLocaleString()}</td>
+                        <td class="p-2.5 font-semibold ${p.change_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${p.change_pct >= 0 ? '+' : ''}${p.change_pct}%</td>
+                        <td class="p-2.5 text-amber-400 font-bold">${p.vol_vs_avg20}x</td>
+                        <td class="p-2.5">${p.rsi}</td>
+                        <td class="p-2.5 text-[11px] text-slate-300">${p.smart_money_signal}</td>
+                        <td class="p-2.5">
+                            <button onclick="selectScreenerStock('${p.symbol}')" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[11px]">Xem</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-rose-400">Lỗi: ${err.message}</td></tr>`;
+            }
+        }
+
+        function selectScreenerStock(sym) {
+            closeScreenerModal();
+            document.getElementById('symbolInput').value = sym;
+            analyzeStock(sym);
+        }
+
+        function closeScreenerModal() {
+            document.getElementById('screenerModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
