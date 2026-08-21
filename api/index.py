@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import httpx
 
-app = FastAPI(title="VN Stock Trading Pro Advisory Engine", version="3.0.0")
+app = FastAPI(title="VN Stock Trading Pro Advisory Engine", version="3.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -79,8 +79,8 @@ def calculate_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
 
 def calculate_orderflow_pressure(df: pd.DataFrame) -> Dict[str, Any]:
     """
-    Phân tích Khớp lệnh Chủ động (Active Buy vs. Active Sell) & Phát hiện Dấu chân Cá Mập.
-    Áp dụng thuật toán Intraday Volume Splitting (Money Flow Multiplier).
+    Phân tích Khớp lệnh Chủ động (Active Buy vs. Active Sell) & Dấu chân Cá Mập.
+    Áp dụng thuật toán Intraday Money Flow Multiplier.
     """
     latest = df.iloc[-1]
     high = float(latest["High"])
@@ -89,7 +89,6 @@ def calculate_orderflow_pressure(df: pd.DataFrame) -> Dict[str, Any]:
     open_p = float(latest["Open"])
     vol = int(latest["Volume"])
 
-    # Money Flow Multiplier
     if high != low:
         mf_multiplier = ((close - low) - (high - close)) / (high - low)
     else:
@@ -100,7 +99,6 @@ def calculate_orderflow_pressure(df: pd.DataFrame) -> Dict[str, Any]:
     active_sell_vol = vol - active_buy_vol
     net_active_vol = active_buy_vol - active_sell_vol
 
-    # Phân bổ quy mô dòng tiền (Smart Money vs Retail)
     shark_buy = int(active_buy_vol * 0.52)
     shark_sell = int(active_sell_vol * 0.25)
     retail_buy = int(active_buy_vol * 0.18)
@@ -148,7 +146,6 @@ def calculate_fundamental_and_events(ticker_obj: yf.Ticker, curr_price: float) -
     div_yield = info.get("dividendYield", None)
     market_cap = info.get("marketCap", None)
 
-    # Health score
     health_score = 70
     if pe and 0 < pe < 15:
         health_score += 10
@@ -157,7 +154,6 @@ def calculate_fundamental_and_events(ticker_obj: yf.Ticker, curr_price: float) -
     if pb and 0 < pb < 2.0:
         health_score += 10
 
-    # Lịch cổ tức & sự kiện
     events = []
     try:
         cal = ticker_obj.calendar
@@ -190,7 +186,6 @@ def calculate_atr_risk_management(df: pd.DataFrame, curr_price: float) -> Dict[s
     atr_val = float(df["ATR"].iloc[-1]) if not pd.isna(df["ATR"].iloc[-1]) else (curr_price * 0.02)
     atr_pct = (atr_val / curr_price) * 100
 
-    # Dynamic Bracket theo ATR
     dynamic_stop_loss = round(curr_price - (2.0 * atr_val), 0)
     trailing_stop_price = round(curr_price - (1.0 * atr_val), 0)
     take_profit_target = round(curr_price + (3.0 * atr_val), 0)
@@ -371,10 +366,11 @@ ADVICE_JSON_SCHEMA = {
 
 @app.get("/api/screener")
 @app.get("/screener")
+@app.get("/api/index.py/screener")
 async def daily_market_screener():
     """
-    ADD-ON 5: Daily Market Screener sau phiên ATC.
-    Quét toàn bộ danh mục Universe để lọc ra Top 5 cổ phiếu Breakout có độ tin cậy tín hiệu cao nhất.
+    Daily Market Screener sau phiên ATC.
+    Quét danh mục Universe để lọc Top 5 cổ phiếu Breakout có độ tin cậy tín hiệu cao nhất.
     """
     now = time.time()
     if "top5_screener" in SCREENER_CACHE:
@@ -405,9 +401,7 @@ async def daily_market_screener():
             rsi = float(latest["RSI"]) if not pd.isna(latest["RSI"]) else 50.0
             sma20 = float(latest["SMA20"])
 
-            # Điều kiện Breakout: Vượt SMA20 + Khối lượng bùng nổ > 1.2x TB20 + RSI trong vùng xung lực mạnh (50 - 68)
             is_breakout = (close >= sma20) and (vol >= avg_vol20 * 1.15) and (50 <= rsi <= 70)
-            
             rel = calculate_signal_reliability(df)
             orderflow = calculate_orderflow_pressure(df)
 
@@ -429,7 +423,6 @@ async def daily_market_screener():
         except Exception:
             continue
 
-    # Lấy Top 5 mã có điểm số kỹ thuật & độ tin cậy cao nhất
     screened_results.sort(key=lambda x: x["score"], reverse=True)
     top_5 = screened_results[:5]
 
@@ -444,8 +437,9 @@ async def daily_market_screener():
 
 @app.post("/api/analyze")
 @app.post("/analyze")
-@app.post("/")
+@app.post("/api/index.py/analyze")
 @app.post("/api/index.py")
+@app.post("/")
 async def analyze_stock(req: StockRequest):
     sym = req.symbol.upper().strip()
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -530,7 +524,7 @@ async def analyze_stock(req: StockRequest):
         "realtime_alerts": realtime_alerts
     }
 
-    # 4. Gửi Prompt tổng hợp sang Gemini Flash
+    # 4. Gửi Prompt sang Gemini Flash với Structured Output
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     
     prompt = f"""
