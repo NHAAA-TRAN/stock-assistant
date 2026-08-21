@@ -1,24 +1,22 @@
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 import os
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
-
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import httpx
 
-app = FastAPI(title="VN Stock Trading Pro Advisory Engine", version="3.2.0")
-handler = app
+app = FastAPI(title="VN Stock Trading Pro Advisory Engine")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -347,7 +345,6 @@ ADVICE_JSON_SCHEMA = {
 
 @app.get("/api/screener")
 @app.get("/screener")
-@app.get("/api/index.py/screener")
 async def daily_market_screener():
     now = time.time()
     if "top5_screener" in SCREENER_CACHE:
@@ -412,9 +409,6 @@ async def daily_market_screener():
 
 @app.post("/api/analyze")
 @app.post("/analyze")
-@app.post("/api/index.py/analyze")
-@app.post("/api/index.py")
-@app.post("/")
 async def analyze_stock(req: StockRequest):
     sym = req.symbol.upper().strip()
     api_key = os.environ.get("GEMINI_API_KEY")[cite: 1]
