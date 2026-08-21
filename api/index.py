@@ -1,7 +1,7 @@
 import os
 import time
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +12,7 @@ import numpy as np
 import httpx
 
 app = FastAPI(title="VN Stock Trading Pro Advisory Engine", version="3.2.0")
+handler = app
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,10 +24,9 @@ app.add_middleware(
 
 ANALYSIS_CACHE: Dict[str, Any] = {}
 SCREENER_CACHE: Dict[str, Any] = {}
-CACHE_TTL = 300  # 5 phút
+CACHE_TTL = 300
 MAX_CACHE_ENTRIES = 100
 
-# Rổ cổ phiếu quét Top tín hiệu thị trường (VN30 & Midcap tiêu biểu)
 WATCHLIST_UNIVERSE = [
     "HPG", "VCB", "SSI", "TCB", "FPT", "VHM", "VIC", "MWG", "MBB", "ACB",
     "STB", "VPB", "VNM", "GAS", "MSN", "GVR", "PLX", "VRE", "DGC", "PVD",
@@ -35,11 +35,10 @@ WATCHLIST_UNIVERSE = [
 
 
 class StockRequest(BaseModel):
-    symbol: str = Field(..., min_length=2, max_length=10, description="Mã cổ phiếu (VD: VCB, HPG, SSI)")
+    symbol: str = Field(..., min_length=2, max_length=10)
 
 
 def get_next_trading_days(start_date: datetime, count: int = 5) -> List[str]:
-    """Tính các ngày giao dịch tiếp theo (bỏ qua T7 & CN)"""
     days = []
     curr = start_date + timedelta(days=1)
     while len(days) < count:
@@ -50,38 +49,28 @@ def get_next_trading_days(start_date: datetime, count: int = 5) -> List[str]:
 
 
 def calculate_rsi_wilder(series: pd.Series, period: int = 14) -> pd.Series:
-    """Tính RSI theo chuẩn Wilder's Smoothing (EMA alpha = 1/period)"""
     delta = series.diff()
     gain = delta.clip(lower=0)
     loss = -delta.clip(upper=0)
-
     avg_gain = gain.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
     avg_loss = loss.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
-
     rs = avg_gain / (avg_loss + 1e-9)
     return 100 - (100 / (1 + rs))
 
 
 def calculate_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
-    """Tính Average True Range (ATR) 14 phiên"""
     high = df["High"]
     low = df["Low"]
     close = df["Close"]
     prev_close = close.shift(1)
-
     tr1 = high - low
     tr2 = (high - prev_close).abs()
     tr3 = (low - prev_close).abs()
-
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
     return tr.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
 
 
 def calculate_orderflow_pressure(df: pd.DataFrame) -> Dict[str, Any]:
-    """
-    Phân tích Khớp lệnh Chủ động (Active Buy vs. Active Sell) & Dấu chân Cá Mập.
-    Áp dụng thuật toán Intraday Money Flow Multiplier.
-    """
     latest = df.iloc[-1]
     high = float(latest["High"])
     low = float(latest["Low"])
@@ -133,7 +122,6 @@ def calculate_orderflow_pressure(df: pd.DataFrame) -> Dict[str, Any]:
 
 
 def calculate_fundamental_and_events(ticker_obj: yf.Ticker, curr_price: float) -> Dict[str, Any]:
-    """Lấy dữ liệu Định giá (P/E, P/B, ROE) & Lịch sự kiện Quyền / Cổ tức"""
     info = {}
     try:
         info = ticker_obj.info or {}
@@ -182,10 +170,8 @@ def calculate_fundamental_and_events(ticker_obj: yf.Ticker, curr_price: float) -
 
 
 def calculate_atr_risk_management(df: pd.DataFrame, curr_price: float) -> Dict[str, Any]:
-    """Tính toán ATR(14) để đặt Stop Loss động (Trailing Stop) và Quản trị rủi ro"""
     atr_val = float(df["ATR"].iloc[-1]) if not pd.isna(df["ATR"].iloc[-1]) else (curr_price * 0.02)
     atr_pct = (atr_val / curr_price) * 100
-
     dynamic_stop_loss = round(curr_price - (2.0 * atr_val), 0)
     trailing_stop_price = round(curr_price - (1.0 * atr_val), 0)
     take_profit_target = round(curr_price + (3.0 * atr_val), 0)
@@ -209,10 +195,8 @@ def calculate_atr_risk_management(df: pd.DataFrame, curr_price: float) -> Dict[s
 
 
 def evaluate_realtime_triggers(curr_price: float, rsi: float, dynamic_buy_zone: float) -> Dict[str, Any]:
-    """Kiểm tra điều kiện cảnh báo tức thời: Giá chạm vùng Mua hoặc RSI chạm ngưỡng Quá Bán"""
     triggers = []
     is_alert = False
-
     if rsi <= 32.0:
         triggers.append(f"🚨 RSI CHẠM VÙNG QUÁ BÁN ({rsi}): Xác suất bật nảy kỹ thuật cực cao!")
         is_alert = True
@@ -231,7 +215,6 @@ def evaluate_realtime_triggers(curr_price: float, rsi: float, dynamic_buy_zone: 
 
 
 def calculate_signal_reliability(df: pd.DataFrame) -> Dict[str, Any]:
-    """Kiểm chứng độ tin cậy tín hiệu trong quá khứ (Lịch sử 6 tháng gần nhất)"""
     if len(df) < 55:
         return {
             "title": "ĐỘ TIN CẬY TÍN HIỆU (T+5)",
@@ -287,14 +270,12 @@ def calculate_signal_reliability(df: pd.DataFrame) -> Dict[str, Any]:
 
 
 def fetch_vnindex_macro() -> Dict[str, Any]:
-    """Lấy dữ liệu vĩ mô VN-Index"""
     try:
         vnindex = yf.Ticker("^VNINDEX")
         vdf = vnindex.history(period="3mo", interval="1d")
         if vdf is not None and not vdf.empty and len(vdf) >= 20:
             vdf["SMA20"] = vdf["Close"].rolling(window=20).mean()
             vdf["RSI"] = calculate_rsi_wilder(vdf["Close"], period=14)
-            
             v_latest = vdf.iloc[-1]
             v_prev = vdf.iloc[-2]
             v_close = float(v_latest["Close"])
@@ -368,35 +349,30 @@ ADVICE_JSON_SCHEMA = {
 @app.get("/screener")
 @app.get("/api/index.py/screener")
 async def daily_market_screener():
-    """
-    Daily Market Screener sau phiên ATC.
-    Quét danh mục Universe để lọc Top 5 cổ phiếu Breakout có độ tin cậy tín hiệu cao nhất.
-    """
     now = time.time()
     if "top5_screener" in SCREENER_CACHE:
         cached_screener, cached_time = SCREENER_CACHE["top5_screener"]
-        if now - cached_time < 1800:  # Cache 30 phút
+        if now - cached_time < 1800:
             return cached_screener
 
     screened_results = []
-    
     for sym in WATCHLIST_UNIVERSE:
         try:
-            ticker = f"{sym}.VN"
-            stock = yf.Ticker(ticker)
-            df = stock.history(period="6mo", interval="1d")
+            ticker = f"{sym}.VN"[cite: 1]
+            stock = yf.Ticker(ticker)[cite: 1]
+            df = stock.history(period="6mo", interval="1d")[cite: 1]
             if df is None or df.empty or len(df) < 30:
                 continue
 
-            df["SMA20"] = df["Close"].rolling(window=20).mean()
-            df["SMA50"] = df["Close"].rolling(window=50).mean()
+            df["SMA20"] = df["Close"].rolling(window=20).mean()[cite: 1]
+            df["SMA50"] = df["Close"].rolling(window=50).mean()[cite: 1]
             df["RSI"] = calculate_rsi_wilder(df["Close"], period=14)
             df["ATR"] = calculate_atr(df, period=14)
 
-            latest = df.iloc[-1]
-            prev = df.iloc[-2]
-            close = float(latest["Close"])
-            vol = int(latest["Volume"])
+            latest = df.iloc[-1][cite: 1]
+            prev = df.iloc[-2][cite: 1]
+            close = float(latest["Close"])[cite: 1]
+            vol = int(latest["Volume"])[cite: 1]
             avg_vol20 = int(df["Volume"].tail(20).mean())
             rsi = float(latest["RSI"]) if not pd.isna(latest["RSI"]) else 50.0
             sma20 = float(latest["SMA20"])
@@ -404,7 +380,6 @@ async def daily_market_screener():
             is_breakout = (close >= sma20) and (vol >= avg_vol20 * 1.15) and (50 <= rsi <= 70)
             rel = calculate_signal_reliability(df)
             orderflow = calculate_orderflow_pressure(df)
-
             score = rel["win_rate"] * 0.6 + (vol / (avg_vol20 + 1)) * 20 + (orderflow["active_buy_pct"] * 0.2)
 
             if is_breakout or rel["win_rate"] >= 65:
@@ -455,7 +430,6 @@ async def analyze_stock(req: StockRequest):
         if now - cached_time < CACHE_TTL:
             return cached_data
 
-    # 1. Truy xuất dữ liệu
     try:
         ticker = f"{sym}.VN"[cite: 1]
         stock = yf.Ticker(ticker)[cite: 1]
@@ -470,7 +444,6 @@ async def analyze_stock(req: StockRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi truy xuất dữ liệu: {str(e)}")[cite: 1]
 
-    # 2. Tính toán các chỉ báo kỹ thuật cốt lõi
     df["SMA20"] = df["Close"].rolling(window=20).mean()[cite: 1]
     df["SMA50"] = df["Close"].rolling(window=50).mean()[cite: 1]
     df["RSI"] = calculate_rsi_wilder(df["Close"], period=14)
@@ -489,7 +462,6 @@ async def analyze_stock(req: StockRequest):
     last_trade_date = pd.to_datetime(recent_10.index[-1]).to_pydatetime()[cite: 1]
     future_dates = get_next_trading_days(last_trade_date, count=5)[cite: 1]
 
-    # 3. Tính toán các Module Add-on
     macro_info = fetch_vnindex_macro()
     signal_reliability = calculate_signal_reliability(df)
     orderflow = calculate_orderflow_pressure(df)
@@ -524,7 +496,6 @@ async def analyze_stock(req: StockRequest):
         "realtime_alerts": realtime_alerts
     }
 
-    # 4. Gửi Prompt sang Gemini 3.6 Flash với Structured Output
     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"[cite: 1]
     
     prompt = f"""
