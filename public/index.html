@@ -41,6 +41,12 @@
             }
         }
     </script>
+    <!-- Custom Base Font Scale (Tăng ~12-15% toàn web) -->
+    <style>
+        html {
+            font-size: 17.5px;
+        }
+    </style>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- FontAwesome Icons -->
@@ -50,28 +56,28 @@
 
     <!-- Top Navigation Header -->
     <header class="border-b border-pastel-border bg-white/95 backdrop-blur sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-pastel-blueBg border border-pastel-blueBorder flex items-center justify-center text-blue-600 shadow-sm">
-                    <i class="fa-solid fa-chart-line text-lg"></i>
+                <div class="w-11 h-11 rounded-xl bg-pastel-blueBg border border-pastel-blueBorder flex items-center justify-center text-blue-600 shadow-sm">
+                    <i class="fa-solid fa-chart-line text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight tracking-wide text-slate-900">VN STOCK <span class="text-blue-600">AI PRO</span></h1>
-                    <p class="text-xs text-slate-500">Hệ thống Khuyến nghị & Quản trị Rủi ro Tự động</p>
+                    <h1 class="font-bold text-xl leading-tight tracking-wide text-slate-900">VN STOCK <span class="text-blue-600">AI PRO</span></h1>
+                    <p class="text-xs text-slate-500 font-medium">Hệ thống Khuyến nghị & Quản trị Rủi ro Tự động</p>
                 </div>
             </div>
 
             <!-- Search & Screener Trigger -->
-            <div class="flex items-center gap-2 w-full md:w-auto">
-                <div class="relative flex-1 md:w-80">
+            <div class="flex items-center gap-2.5 w-full md:w-auto">
+                <div class="relative flex-1 md:w-88">
                     <input type="text" id="symbolInput" placeholder="Nhập mã CP (VD: HPG, MBS, SSI)..." 
-                           class="w-full bg-pastel-subtle border border-pastel-border text-slate-800 font-bold rounded-lg px-4 py-2 text-sm uppercase placeholder:normal-case placeholder:font-normal focus:outline-none focus:border-blue-400 focus:bg-white transition-all shadow-inner">
+                           class="w-full bg-pastel-subtle border border-pastel-border text-slate-800 font-bold rounded-lg px-4 py-2 text-base uppercase placeholder:normal-case placeholder:font-normal focus:outline-none focus:border-blue-400 focus:bg-white transition-all shadow-inner">
                     <button onclick="analyzeStock()" id="btnSearch" class="absolute right-1 top-1 bottom-1 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-bolt"></i>
                         <span>Phân tích</span>
                     </button>
                 </div>
-                <button onclick="fetchDailyScreener()" class="bg-white hover:bg-slate-50 text-slate-700 border border-pastel-border px-3.5 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors whitespace-nowrap shadow-sm font-medium">
+                <button onclick="fetchDailyScreener()" class="bg-white hover:bg-slate-50 text-slate-700 border border-pastel-border px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors whitespace-nowrap shadow-sm font-medium">
                     <i class="fa-solid fa-filter text-blue-600"></i>
                     <span class="hidden sm:inline">Top Tín Hiệu</span>
                 </button>
@@ -83,32 +89,32 @@
     <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
         <!-- Macro VN-Index Banner -->
-        <section id="macroSection" class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white border border-pastel-border rounded-xl p-4 shadow-sm">
+        <section id="macroSection" class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white border border-pastel-border rounded-xl p-4 shadow-sm">
             <div class="border-r border-pastel-border pr-3">
-                <span class="text-[11px] font-semibold text-slate-500 block mb-0.5">CHỈ SỐ VN-INDEX</span>
+                <span class="text-xs font-semibold text-slate-500 block mb-0.5">CHỈ SỐ VN-INDEX</span>
                 <div class="flex items-baseline gap-2">
-                    <span id="vnindexPoint" class="text-lg font-black text-slate-900">--</span>
-                    <span id="vnindexChange" class="text-xs font-bold">--%</span>
+                    <span id="vnindexPoint" class="text-xl font-black text-slate-900 font-mono">--</span>
+                    <span id="vnindexChange" class="text-sm font-bold font-mono">--%</span>
                 </div>
             </div>
             <div class="border-r border-pastel-border px-3">
-                <span class="text-[11px] font-semibold text-slate-500 block mb-0.5">RSI THỊ TRƯỜNG (14)</span>
-                <span id="vnindexRsi" class="text-lg font-black text-slate-900">--</span>
+                <span class="text-xs font-semibold text-slate-500 block mb-0.5">RSI THỊ TRƯỜNG (14)</span>
+                <span id="vnindexRsi" class="text-xl font-black text-slate-900 font-mono">--</span>
             </div>
             <div class="border-r border-pastel-border px-3">
-                <span class="text-[11px] font-semibold text-slate-500 block mb-1">TRẠNG THÁI VĨ MÔ</span>
-                <span id="vnindexStatus" class="inline-block text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">ĐANG TẢI...</span>
+                <span class="text-xs font-semibold text-slate-500 block mb-1">TRẠNG THÁI VĨ MÔ</span>
+                <span id="vnindexStatus" class="inline-block text-xs font-bold px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">ĐANG TẢI...</span>
             </div>
             <div class="pl-3">
-                <span class="text-[11px] font-semibold text-slate-500 block mb-1">RỦI RO HỆ THỐNG</span>
-                <span id="macroRiskLevel" class="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded inline-block">THẤP</span>
+                <span class="text-xs font-semibold text-slate-500 block mb-1">RỦI RO HỆ THỐNG</span>
+                <span id="macroRiskLevel" class="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded inline-block">THẤP</span>
             </div>
         </section>
 
         <!-- Loading State -->
         <div id="loadingState" class="hidden py-16 text-center space-y-4">
-            <div class="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-slate-600 text-sm font-medium animate-pulse">Đang đồng bộ Orderflow vi mô, ATR dynamic bracket & kiểm chứng T+5...</p>
+            <div class="inline-block w-11 h-11 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-slate-600 text-base font-medium animate-pulse">Đang đồng bộ Orderflow vi mô, ATR dynamic bracket & kiểm chứng T+5...</p>
         </div>
 
         <!-- Realtime Alert Banner -->
@@ -126,36 +132,36 @@
                             <div>
                                 <div class="flex items-center gap-2">
                                     <h2 id="resSymbol" class="text-3xl font-black tracking-wide text-slate-900">HPG</h2>
-                                    <span id="resExchange" class="text-xs px-2 py-0.5 rounded bg-pastel-blueBg text-blue-700 border border-pastel-blueBorder font-mono font-bold">HOSE</span>
+                                    <span id="resExchange" class="text-xs px-2.5 py-0.5 rounded bg-pastel-blueBg text-blue-700 border border-pastel-blueBorder font-mono font-bold">HOSE</span>
                                 </div>
                                 <div class="flex items-baseline gap-2 mt-1">
                                     <p id="resPrice" class="text-3xl font-black text-emerald-600 font-mono">-- VNĐ</p>
-                                    <span id="resChange" class="text-sm font-bold text-emerald-600">--%</span>
+                                    <span id="resChange" class="text-base font-bold text-emerald-600">--%</span>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">Độ Tin Cậy Tín Hiệu</span>
-                                <span id="resBadgeRating" class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded inline-block">RẤT CAO ⭐⭐⭐</span>
-                                <span id="resWinRate" class="text-[11px] text-slate-500 block mt-1">Winrate T+5: <strong class="text-slate-800">--%</strong></span>
+                                <span class="text-xs text-slate-500 uppercase tracking-wider block font-bold">Độ Tin Cậy Tín Hiệu</span>
+                                <span id="resBadgeRating" class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded inline-block mt-0.5">RẤT CAO ⭐⭐⭐</span>
+                                <span id="resWinRate" class="text-xs text-slate-500 block mt-1">Winrate T+5: <strong class="text-slate-900 font-mono">--%</strong></span>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3 pt-3 border-t border-pastel-border text-xs">
+                        <div class="grid grid-cols-2 gap-3 pt-3 border-t border-pastel-border text-sm">
                             <div>
-                                <span class="text-slate-500">Khối lượng khớp:</span>
-                                <p id="resVol" class="font-mono font-bold text-slate-800">--</p>
+                                <span class="text-slate-500 block text-xs">Khối lượng khớp:</span>
+                                <p id="resVol" class="font-mono font-bold text-slate-800 text-sm mt-0.5">--</p>
                             </div>
                             <div>
-                                <span class="text-slate-500">TB 20 Phiên:</span>
-                                <p id="resAvgVol" class="font-mono font-bold text-slate-800">--</p>
+                                <span class="text-slate-500 block text-xs">TB 20 Phiên:</span>
+                                <p id="resAvgVol" class="font-mono font-bold text-slate-800 text-sm mt-0.5">--</p>
                             </div>
                             <div>
-                                <span class="text-slate-500">RSI (14 Wilder):</span>
-                                <p id="resRSI" class="font-mono font-bold text-slate-800">--</p>
+                                <span class="text-slate-500 block text-xs">RSI (14 Wilder):</span>
+                                <p id="resRSI" class="font-mono font-bold text-slate-800 text-sm mt-0.5">--</p>
                             </div>
                             <div>
-                                <span class="text-slate-500">SMA20 / SMA50:</span>
-                                <p id="resSMA" class="font-mono font-bold text-slate-800">-- / --</p>
+                                <span class="text-slate-500 block text-xs">SMA20 / SMA50:</span>
+                                <p id="resSMA" class="font-mono font-bold text-slate-800 text-sm mt-0.5">-- / --</p>
                             </div>
                         </div>
                     </div>
@@ -170,29 +176,29 @@
                                 <span id="resAction" class="px-3.5 py-1 rounded-lg text-xs font-black tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200">MUA MỚI</span>
                             </div>
 
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 <div class="bg-pastel-subtle p-3 rounded-xl border border-pastel-border">
-                                    <span class="text-slate-500 block text-[11px] font-medium">🎯 Vùng mua tối ưu</span>
-                                    <span id="resBuyZone" class="font-bold text-slate-900 text-sm mt-0.5 block font-mono">--</span>
+                                    <span class="text-slate-500 block text-xs font-medium">🎯 Vùng mua tối ưu</span>
+                                    <span id="resBuyZone" class="font-bold text-slate-900 text-sm mt-1 block font-mono">--</span>
                                 </div>
                                 <div class="bg-pastel-greenBg p-3 rounded-xl border border-pastel-greenBorder">
-                                    <span class="text-emerald-800 block text-[11px] font-medium">🚀 Mục tiêu giá (TP)</span>
-                                    <span id="resTarget" class="font-bold text-emerald-700 text-sm mt-0.5 block font-mono">--</span>
+                                    <span class="text-emerald-800 block text-xs font-medium">🚀 Mục tiêu giá (TP)</span>
+                                    <span id="resTarget" class="font-bold text-emerald-700 text-sm mt-1 block font-mono">--</span>
                                 </div>
                                 <div class="bg-pastel-redBg p-3 rounded-xl border border-pastel-redBorder">
-                                    <span class="text-rose-800 block text-[11px] font-medium">🛑 Cắt lỗ an toàn (SL)</span>
-                                    <span id="resStopLoss" class="font-bold text-rose-600 text-sm mt-0.5 block font-mono">--</span>
+                                    <span class="text-rose-800 block text-xs font-medium">🛑 Cắt lỗ an toàn (SL)</span>
+                                    <span id="resStopLoss" class="font-bold text-rose-600 text-sm mt-1 block font-mono">--</span>
                                 </div>
                                 <div class="bg-pastel-amberBg p-3 rounded-xl border border-pastel-amberBorder">
-                                    <span class="text-amber-800 block text-[11px] font-medium">💼 Tỷ trọng đề xuất</span>
-                                    <span id="resCapital" class="font-bold text-amber-800 text-sm mt-0.5 block">--</span>
+                                    <span class="text-amber-800 block text-xs font-medium">💼 Tỷ trọng đề xuất</span>
+                                    <span id="resCapital" class="font-bold text-amber-800 text-sm mt-1 block">--</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between text-xs text-slate-600 pt-3 border-t border-pastel-border font-medium">
-                            <span>Tỷ lệ R:R: <strong id="resRR" class="text-slate-900 font-mono font-bold">1:2</strong></span>
-                            <span>Xu hướng Tuần / Tháng: <strong id="resTrend" class="text-emerald-700 font-bold">TĂNG / TÍCH LŨY</strong></span>
+                            <span>Tỷ lệ R:R: <strong id="resRR" class="text-slate-900 font-mono font-bold text-sm">1:2</strong></span>
+                            <span>Xu hướng: <strong id="resTrend" class="text-emerald-700 font-bold">TĂNG / TÍCH LŨY</strong></span>
                             <span>Dữ liệu: <strong id="resEngineSource" class="text-blue-700 font-mono">DNSE REALTIME</strong></span>
                         </div>
                     </div>
@@ -200,76 +206,76 @@
             </section>
 
             <!-- ========================================== -->
-            <!-- 1. DEMO 1: ORDERFLOW VI MÔ ENGINE          -->
+            <!-- 1. DÒNG TIỀN VI MÔ: ORDERFLOW ENGINE       -->
             <!-- ========================================== -->
             <section class="bg-white border border-pastel-border rounded-2xl p-5 shadow-sm space-y-5">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-pastel-border pb-3">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-base">
                             <i class="fa-solid fa-bolt"></i>
                         </div>
-                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                            ⚡ DÒNG TIỀN VI MÔ: PHÂN TÍCH KHỚP LỆNH CHỦ ĐỘNG (ORDERFLOW) - MÃ: <span id="ofHeaderSym" class="text-blue-600">HPG</span>[cite: 1]
+                        <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide">
+                            ⚡ DÒNG TIỀN VI MÔ: PHÂN TÍCH KHỚP LỆNH CHỦ ĐỘNG (ORDERFLOW) - MÃ: <span id="ofHeaderSym" class="text-blue-600 font-mono">HPG</span>
                         </h3>
                     </div>
-                    <span id="resSmartMoneyAction" class="text-xs font-bold px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">CÁ MẬP GOM HÀNG CHỦ ĐỘNG 🟢</span>
+                    <span id="resSmartMoneyAction" class="text-xs font-bold px-3 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">CÁ MẬP GOM HÀNG CHỦ ĐỘNG 🟢</span>
                 </div>
 
                 <!-- Cung - Cầu Trong Phiên -->
-                <div class="space-y-2">
-                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider block">TỔNG QUAN ÁP LỰC CUNG - CẦU TRONG PHIÊN[cite: 1]:</span>
-                    <div class="flex justify-between text-xs font-bold">
-                        <span class="text-emerald-700 flex items-center gap-1">
-                            <i class="fa-solid fa-circle text-[8px] text-emerald-500"></i> CHỦ ĐỘNG MUA (Ăn lên): <span id="resBuyVolDetailed" class="font-mono text-slate-900">-- CP (64.7%)</span>[cite: 1]
+                <div class="space-y-2.5">
+                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider block">TỔNG QUAN ÁP LỰC CUNG - CẦU TRONG PHIÊN:</span>
+                    <div class="flex justify-between text-xs sm:text-sm font-bold">
+                        <span class="text-emerald-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle text-[8px] text-emerald-500"></i> CHỦ ĐỘNG MUA (Ăn lên): <span id="resBuyVolDetailed" class="font-mono text-slate-900">-- CP (64.7%)</span>
                         </span>
-                        <span class="text-rose-700 flex items-center gap-1">
-                            <i class="fa-solid fa-circle text-[8px] text-rose-500"></i> CHỦ ĐỘNG BÁN (Xả xuống): <span id="resSellVolDetailed" class="font-mono text-slate-900">-- CP (35.3%)</span>[cite: 1]
+                        <span class="text-rose-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle text-[8px] text-rose-500"></i> CHỦ ĐỘNG BÁN (Xả xuống): <span id="resSellVolDetailed" class="font-mono text-slate-900">-- CP (35.3%)</span>
                         </span>
                     </div>
 
                     <!-- Progress Bar -->
-                    <div class="w-full bg-rose-100 h-4 rounded-full overflow-hidden flex shadow-inner border border-pastel-border">
-                        <div id="resBuyBar" class="bg-emerald-500 h-full transition-all duration-500 flex items-center justify-end pr-2 text-[10px] text-white font-bold" style="width: 60%"></div>
-                        <div id="resSellBar" class="bg-rose-500 h-full transition-all duration-500 flex items-center justify-start pl-2 text-[10px] text-white font-bold" style="width: 40%"></div>
+                    <div class="w-full bg-rose-100 h-5 rounded-full overflow-hidden flex shadow-inner border border-pastel-border">
+                        <div id="resBuyBar" class="bg-emerald-500 h-full transition-all duration-500 flex items-center justify-end pr-2 text-xs text-white font-bold font-mono" style="width: 60%"></div>
+                        <div id="resSellBar" class="bg-rose-500 h-full transition-all duration-500 flex items-center justify-start pl-2 text-xs text-white font-bold font-mono" style="width: 40%"></div>
                     </div>
-                    <p id="resNetActiveSummary" class="text-xs font-semibold text-emerald-700 flex items-center gap-1">
-                        <i class="fa-solid fa-caret-up text-emerald-600 text-sm"></i> <span>▲ Mua ròng chủ động: +7,200,000 CP (Bên Mua kiểm soát thế trận 🟢)</span>[cite: 1]
+                    <p id="resNetActiveSummary" class="text-sm font-semibold text-emerald-700 flex items-center gap-1.5 pt-0.5">
+                        <i class="fa-solid fa-caret-up text-emerald-600 text-lg"></i> <span>▲ Mua ròng chủ động: +7,200,000 CP (Bên Mua kiểm soát thế trận 🟢)</span>
                     </p>
                 </div>
 
                 <!-- Phân bổ Quy mô Lệnh (Smart Money) -->
-                <div class="space-y-2 pt-2">
+                <div class="space-y-2.5 pt-2">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-chart-pie text-blue-600"></i> 📊 PHÂN BỔ QUY MÔ LỆNH (DẤU CHÂN CÁ MẬP / SMART MONEY)[cite: 1]:
+                        <i class="fa-solid fa-chart-pie text-blue-600"></i> 📊 PHÂN BỔ QUY MÔ LỆNH (DẤU CHÂN CÁ MẬP / SMART MONEY):
                     </span>
                     <div class="overflow-x-auto rounded-xl border border-pastel-border">
-                        <table class="w-full text-xs text-left">
+                        <table class="w-full text-sm text-left">
                             <thead class="bg-pastel-subtle text-slate-600 border-b border-pastel-border">
                                 <tr>
-                                    <th class="p-2.5 font-bold">LOẠI NHÀ ĐẦU TƯ[cite: 1]</th>
-                                    <th class="p-2.5 font-bold">KL MUA CHỦ ĐỘNG[cite: 1]</th>
-                                    <th class="p-2.5 font-bold">KL BÁN CHỦ ĐỘNG[cite: 1]</th>
-                                    <th class="p-2.5 font-bold">TƯƠNG QUAN LỰC ĐẨY[cite: 1]</th>
+                                    <th class="p-3 font-bold">LOẠI NHÀ ĐẦU TƯ</th>
+                                    <th class="p-3 font-bold">KL MUA CHỦ ĐỘNG</th>
+                                    <th class="p-3 font-bold">KL BÁN CHỦ ĐỘNG</th>
+                                    <th class="p-3 font-bold">TƯƠNG QUAN LỰC ĐẨY</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-pastel-border bg-white" id="orderflowTierBody">
                                 <tr>
-                                    <td class="p-2.5 font-bold text-slate-800">🐋 Lớn (>50k CP/lệnh)[cite: 1]</td>
-                                    <td class="p-2.5 font-mono text-emerald-700 font-bold" id="ofSharkBuy">-- CP (53.6%)[cite: 1]</td>
-                                    <td class="p-2.5 font-mono text-rose-600" id="ofSharkSell">-- CP (24.3%)[cite: 1]</td>
-                                    <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[11px]" id="ofSharkBadge">[🟢 Gom ròng +6.4M]</span>[cite: 1]</td>
+                                    <td class="p-3 font-bold text-slate-800">🐋 Lớn (>50k CP/lệnh)</td>
+                                    <td class="p-3 font-mono text-emerald-700 font-bold" id="ofSharkBuy">-- CP (53.6%)</td>
+                                    <td class="p-3 font-mono text-rose-600" id="ofSharkSell">-- CP (24.3%)</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs font-mono" id="ofSharkBadge">[🟢 Gom ròng +6.4M]</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-bold text-slate-800">🐬 Vừa (10k-50k CP)[cite: 1]</td>
-                                    <td class="p-2.5 font-mono text-emerald-700" id="ofDolphinBuy">-- CP (30.6%)[cite: 1]</td>
-                                    <td class="p-2.5 font-mono text-rose-600" id="ofDolphinSell">-- CP (42.2%)[cite: 1]</td>
-                                    <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[11px]" id="ofDolphinBadge">[🟢 Mua ròng +1.2M]</span>[cite: 1]</td>
+                                    <td class="p-3 font-bold text-slate-800">🐬 Vừa (10k-50k CP)</td>
+                                    <td class="p-3 font-mono text-emerald-700" id="ofDolphinBuy">-- CP (30.6%)</td>
+                                    <td class="p-3 font-mono text-rose-600" id="ofDolphinSell">-- CP (42.2%)</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs font-mono" id="ofDolphinBadge">[🟢 Mua ròng +1.2M]</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-bold text-slate-800">🦐 Nhỏ (<10k CP - F0)[cite: 1]</td>
-                                    <td class="p-2.5 font-mono text-emerald-700" id="ofRetailBuy">-- CP (15.8%)[cite: 1]</td>
-                                    <td class="p-2.5 font-mono text-rose-600" id="ofRetailSell">-- CP (33.5%)[cite: 1]</td>
-                                    <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200 font-bold text-[11px]" id="ofRetailBadge">[🔴 Bán ròng -0.4M]</span>[cite: 1]</td>
+                                    <td class="p-3 font-bold text-slate-800">🦐 Nhỏ (<10k CP - F0)</td>
+                                    <td class="p-3 font-mono text-emerald-700" id="ofRetailBuy">-- CP (15.8%)</td>
+                                    <td class="p-3 font-mono text-rose-600" id="ofRetailSell">-- CP (33.5%)</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs font-mono" id="ofRetailBadge">[🔴 Bán ròng -0.4M]</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -279,85 +285,85 @@
                 <!-- Tóm Tắt Tín Hiệu AI Box 1 -->
                 <div class="bg-pastel-blueBg border border-pastel-blueBorder rounded-xl p-4 space-y-1.5 shadow-sm">
                     <span class="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-500 text-sm"></i> 💡 TÓM TẮT TÍN HIỆU AI (ORDERFLOW SIGNAL)[cite: 1]:
+                        <i class="fa-solid fa-lightbulb text-amber-500 text-sm"></i> 💡 TÓM TẮT TÍN HIỆU AI (ORDERFLOW SIGNAL):
                     </span>
-                    <p id="aiOrderflowSummary" class="text-xs text-slate-700 leading-relaxed font-medium">
-                        "Cá mập (Lệnh >50k CP) chiếm áp đảo lượng mua chủ động. Dòng tiền lớn duy trì gom quyết liệt quanh các bước giá hỗ trợ, hấp thụ trọn vẹn áp lực chốt lời ngắn hạn từ nhỏ lẻ."[cite: 1]
+                    <p id="aiOrderflowSummary" class="text-sm text-slate-700 leading-relaxed font-medium">
+                        "Cá mập (Lệnh >50k CP) chiếm áp đảo lượng mua chủ động. Dòng tiền lớn duy trì gom quyết liệt quanh các bước giá hỗ trợ, hấp thụ trọn vẹn áp lực chốt lời ngắn hạn từ nhỏ lẻ."
                     </p>
                 </div>
             </section>
 
             <!-- ========================================== -->
-            <!-- 2. DEMO 2: ATR DYNAMIC RISK ENGINE         -->
+            <!-- 2. TỶ LỆ BIẾN ĐỘNG & ATR DYNAMIC RISK     -->
             <!-- ========================================== -->
             <section class="bg-white border border-pastel-border rounded-2xl p-5 shadow-sm space-y-5">
-                <div class="flex items-center gap-2 border-b border-pastel-border pb-3">
-                    <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">
+                <div class="flex items-center gap-2.5 border-b border-pastel-border pb-3">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-base">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                        ⚡ CẢNH BÁO TỶ LỆ BIẾN ĐỘNG & QUẢN TRỊ RỦI RO ĐỘNG (ATR ENGINE) - MÃ: <span id="atrHeaderSym" class="text-blue-600">HPG</span>[cite: 2]
+                    <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide">
+                        ⚡ CẢNH BÁO TỶ LỆ BIẾN ĐỘNG & QUẢN TRỊ RỦI RO ĐỘNG (ATR ENGINE) - MÃ: <span id="atrHeaderSym" class="text-blue-600 font-mono">HPG</span>
                     </h3>
                 </div>
 
                 <!-- Snapshot Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div class="bg-pastel-subtle p-3.5 rounded-xl border border-pastel-border">
-                        <span class="text-[11px] text-slate-500 font-semibold block">ATR (14 Phiên)[cite: 2]:</span>
-                        <span id="atrValueCard" class="text-base font-black text-slate-900 font-mono block mt-0.5">-- VNĐ</span>
-                        <span class="text-[10px] text-slate-400 font-medium">(Biên độ rung lắc trung bình)[cite: 2]</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <div class="bg-pastel-subtle p-4 rounded-xl border border-pastel-border">
+                        <span class="text-xs text-slate-500 font-semibold block">ATR (14 Phiên):</span>
+                        <span id="atrValueCard" class="text-lg font-black text-slate-900 font-mono block mt-1">-- VNĐ</span>
+                        <span class="text-xs text-slate-400 font-medium">(Biên độ rung lắc trung bình)</span>
                     </div>
-                    <div class="bg-pastel-subtle p-3.5 rounded-xl border border-pastel-border">
-                        <span class="text-[11px] text-slate-500 font-semibold block">% Biến động ngày[cite: 2]:</span>
-                        <span id="atrPctCard" class="text-base font-black text-blue-600 font-mono block mt-0.5">±--%</span>
-                        <span id="atrBasePriceCard" class="text-[10px] text-slate-400 font-medium">(Giá hiện tại: -- VNĐ)[cite: 2]</span>
+                    <div class="bg-pastel-subtle p-4 rounded-xl border border-pastel-border">
+                        <span class="text-xs text-slate-500 font-semibold block">% Biến động ngày:</span>
+                        <span id="atrPctCard" class="text-lg font-black text-blue-600 font-mono block mt-1">±--%</span>
+                        <span id="atrBasePriceCard" class="text-xs text-slate-400 font-medium">(Giá hiện tại: -- VNĐ)</span>
                     </div>
-                    <div class="bg-pastel-subtle p-3.5 rounded-xl border border-pastel-border">
-                        <span class="text-[11px] text-slate-500 font-semibold block">Trạng thái rung lắc[cite: 2]:</span>
-                        <span id="atrStatusCard" class="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded inline-block mt-1">BÌNH THƯỜNG 🟢</span>[cite: 2]
-                        <span class="text-[10px] text-slate-400 font-medium block mt-0.5">(Không có đột biến rủi ro)[cite: 2]</span>
+                    <div class="bg-pastel-subtle p-4 rounded-xl border border-pastel-border">
+                        <span class="text-xs text-slate-500 font-semibold block">Trạng thái rung lắc:</span>
+                        <span id="atrStatusCard" class="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded inline-block mt-1">BÌNH THƯỜNG 🟢</span>
+                        <span class="text-xs text-slate-400 font-medium block mt-1">(Không có đột biến rủi ro)</span>
                     </div>
                 </div>
 
                 <!-- Dynamic ATR Bracket Table -->
-                <div class="space-y-2">
+                <div class="space-y-2.5">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-arrows-split-up-and-left text-amber-600"></i> 🛡️ KHUNG DỪNG LỖ ĐỘNG & MỤC TIÊU THEO ĐỘ BIẾN ĐỘNG (DYNAMIC ATR BRACKET)[cite: 2]:
+                        <i class="fa-solid fa-arrows-split-up-and-left text-amber-600"></i> 🛡️ KHUNG DỪNG LỖ ĐỘNG & MỤC TIÊU THEO ĐỘ BIẾN ĐỘNG (DYNAMIC ATR BRACKET):
                     </span>
                     <div class="overflow-x-auto rounded-xl border border-pastel-border">
-                        <table class="w-full text-xs text-left">
+                        <table class="w-full text-sm text-left">
                             <thead class="bg-pastel-subtle text-slate-600 border-b border-pastel-border">
                                 <tr>
-                                    <th class="p-2.5 font-bold">VÙNG GIÁ THIẾT LẬP[cite: 2]</th>
-                                    <th class="p-2.5 font-bold">MỨC GIÁ TÍNH TOÁN[cite: 2]</th>
-                                    <th class="p-2.5 font-bold">CÔNG THỨC ATR[cite: 2]</th>
-                                    <th class="p-2.5 font-bold">Ý NGHĨA KỸ THUẬT[cite: 2]</th>
+                                    <th class="p-3 font-bold">VÙNG GIÁ THIẾT LẬP</th>
+                                    <th class="p-3 font-bold">MỨC GIÁ TÍNH TOÁN</th>
+                                    <th class="p-3 font-bold">CÔNG THỨC ATR</th>
+                                    <th class="p-3 font-bold">Ý NGHĨA KỸ THUẬT</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-pastel-border bg-white font-mono">
                                 <tr>
-                                    <td class="p-2.5 font-sans font-bold text-emerald-700">🎯 Chốt lời Mục tiêu (TP)[cite: 2]</td>
-                                    <td class="p-2.5 font-bold text-emerald-700" id="atrTableTP">-- VNĐ (+6.85%)[cite: 2]</td>
-                                    <td class="p-2.5 text-slate-600 font-sans">Giá vào + (3.0 × ATR)[cite: 2]</td>
-                                    <td class="p-2.5 font-sans"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[11px]">[ Vùng kháng cự ATR ]</span>[cite: 2]</td>
+                                    <td class="p-3 font-sans font-bold text-emerald-700">🎯 Chốt lời Mục tiêu (TP)</td>
+                                    <td class="p-3 font-bold text-emerald-700" id="atrTableTP">-- VNĐ</td>
+                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá vào + (3.0 × ATR)</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs">[ Vùng kháng cự ATR ]</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-sans font-bold text-slate-800">📍 Điểm vào lệnh chuẩn[cite: 2]</td>
-                                    <td class="p-2.5 font-bold text-slate-900" id="atrTableEntry">-- VNĐ (Base)[cite: 2]</td>
-                                    <td class="p-2.5 text-slate-600 font-sans">Giá khớp hiện tại[cite: 2]</td>
-                                    <td class="p-2.5 font-sans"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-bold text-[11px]">[ Điểm tham chiếu ]</span>[cite: 2]</td>
+                                    <td class="p-3 font-sans font-bold text-slate-800">📍 Điểm vào lệnh chuẩn</td>
+                                    <td class="p-3 font-bold text-slate-900" id="atrTableEntry">-- VNĐ (Base)</td>
+                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá khớp hiện tại</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs">[ Điểm tham chiếu ]</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-sans font-bold text-rose-600">🛑 Cắt lỗ An toàn (SL)[cite: 2]</td>
-                                    <td class="p-2.5 font-bold text-rose-600" id="atrTableSL">-- VNĐ (-4.57%)[cite: 2]</td>
-                                    <td class="p-2.5 text-slate-600 font-sans">Giá vào - (2.0 × ATR)[cite: 2]</td>
-                                    <td class="p-2.5 font-sans"><span class="px-2 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200 font-bold text-[11px]">[ Thoát khi gãy biên ]</span>[cite: 2]</td>
+                                    <td class="p-3 font-sans font-bold text-rose-600">🛑 Cắt lỗ An toàn (SL)</td>
+                                    <td class="p-3 font-bold text-rose-600" id="atrTableSL">-- VNĐ</td>
+                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Giá vào - (2.0 × ATR)</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs">[ Thoát khi gãy biên ]</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-sans font-bold text-amber-700">🔒 Chặn lãi (Trailing Stop)[cite: 2]</td>
-                                    <td class="p-2.5 font-bold text-amber-800" id="atrTableTrailing">-- VNĐ (-2.28%)[cite: 2]</td>
-                                    <td class="p-2.5 text-slate-600 font-sans">Đỉnh gần nhất - 1.0 × ATR[cite: 2]</td>
-                                    <td class="p-2.5 font-sans"><span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[11px]">[ Bảo toàn lợi nhuận ]</span>[cite: 2]</td>
+                                    <td class="p-3 font-sans font-bold text-amber-700">🔒 Chặn lãi (Trailing Stop)</td>
+                                    <td class="p-3 font-bold text-amber-800" id="atrTableTrailing">-- VNĐ</td>
+                                    <td class="p-3 text-slate-600 font-sans text-xs sm:text-sm">Đỉnh gần nhất - 1.0 × ATR</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200 font-bold text-xs">[ Bảo toàn lợi nhuận ]</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -365,22 +371,22 @@
                 </div>
 
                 <!-- Noise Filter Spectrum -->
-                <div class="space-y-2">
+                <div class="space-y-2.5">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-filter text-slate-500"></i> 🚦 THƯỚC ĐO RỦI RO & BẪY RUNG LẮC (NOISE FILTER)[cite: 2]:
+                        <i class="fa-solid fa-filter text-slate-500"></i> 🚦 THƯỚC ĐO RỦI RO & BẪY RUNG LẮC (NOISE FILTER):
                     </span>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                        <div id="noiseLowBox" class="p-3 rounded-xl border border-pastel-border bg-pastel-subtle text-slate-600">
-                            <span class="font-bold block text-slate-800">THẤP (0.5 - 1.5%)[cite: 2]</span>
-                            <span class="text-[11px] text-slate-500">Cổ phiếu phòng thủ / Bluechip ít biến động[cite: 2]</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                        <div id="noiseLowBox" class="p-3.5 rounded-xl border border-pastel-border bg-pastel-subtle text-slate-600">
+                            <span class="font-bold block text-slate-800">THẤP (0.5 - 1.5%)</span>
+                            <span class="text-xs text-slate-500 mt-0.5 block">Cổ phiếu phòng thủ / Bluechip ít biến động</span>
                         </div>
-                        <div id="noiseMidBox" class="p-3 rounded-xl border border-pastel-greenBorder bg-pastel-greenBg text-emerald-800 shadow-sm">
-                            <span class="font-bold block text-emerald-900" id="noiseMidText">🟩 ĐANG Ở VÙNG NÀY (2.28%)[cite: 2]</span>
-                            <span class="text-[11px] text-emerald-700">Biên độ chuẩn để lướt sóng T+[cite: 2]</span>
+                        <div id="noiseMidBox" class="p-3.5 rounded-xl border border-pastel-greenBorder bg-pastel-greenBg text-emerald-800 shadow-sm">
+                            <span class="font-bold block text-emerald-900" id="noiseMidText">🟩 ĐANG Ở VÙNG NÀY (±2.28%)</span>
+                            <span class="text-xs text-emerald-700 mt-0.5 block">Biên độ chuẩn để lướt sóng T+</span>
                         </div>
-                        <div id="noiseHighBox" class="p-3 rounded-xl border border-pastel-border bg-pastel-subtle text-slate-600">
-                            <span class="font-bold block text-slate-800">CAO NGUY HIỂM (> 3.5%)[cite: 2]</span>
-                            <span class="text-[11px] text-slate-500">Hàng đầu cơ / Penny biến động mạnh, dễ quét SL[cite: 2]</span>
+                        <div id="noiseHighBox" class="p-3.5 rounded-xl border border-pastel-border bg-pastel-subtle text-slate-600">
+                            <span class="font-bold block text-slate-800">CAO NGUY HIỂM (> 3.5%)</span>
+                            <span class="text-xs text-slate-500 mt-0.5 block">Hàng đầu cơ / Penny biến động mạnh, dễ quét SL</span>
                         </div>
                     </div>
                 </div>
@@ -388,80 +394,80 @@
                 <!-- Tóm Tắt Tín Hiệu AI Box 2 -->
                 <div class="bg-pastel-amberBg border border-pastel-amberBorder rounded-xl p-4 space-y-1.5 shadow-sm">
                     <span class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-600 text-sm"></i> 💡 TƯ VẤN QUẢN TRỊ VỐN TỪ AI (ATR-BASED SIZING)[cite: 2]:
+                        <i class="fa-solid fa-lightbulb text-amber-600 text-sm"></i> 💡 TƯ VẤN QUẢN TRỊ VỐN TỪ AI (ATR-BASED SIZING):
                     </span>
-                    <ul class="text-xs text-slate-800 space-y-1 leading-relaxed font-medium" id="aiAtrCapitalAdvice">
-                        <li>• Khuyến nghị đặt Stop Loss cách 2.0x ATR để tránh bị 'quét dừng lỗ' bởi các nhịp rung lắc tự nhiên trong phiên.[cite: 2]</li>
-                        <li>• Khi giá bứt phá vượt qua mốc mục tiêu 1, tự động nâng điểm Trailing Stop lên mốc hòa vốn để khóa lợi nhuận an toàn.[cite: 2]</li>
+                    <ul class="text-sm text-slate-800 space-y-1.5 leading-relaxed font-medium" id="aiAtrCapitalAdvice">
+                        <li>• Khuyến nghị đặt Stop Loss cách 2.0x ATR để tránh bị 'quét dừng lỗ' bởi các nhịp rung lắc tự nhiên trong phiên.</li>
+                        <li>• Khi giá bứt phá vượt qua mốc mục tiêu 1, tự động nâng điểm Trailing Stop lên mốc hòa vốn để khóa lợi nhuận an toàn.</li>
                     </ul>
                 </div>
             </section>
 
             <!-- ========================================== -->
-            <!-- 3. DEMO 3: FUNDAMENTAL & VALUE TRAP FILTER -->
+            <!-- 3. FUNDAMENTAL & VALUE TRAP FILTER         -->
             <!-- ========================================== -->
             <section class="bg-white border border-pastel-border rounded-2xl p-5 shadow-sm space-y-5">
-                <div class="flex items-center gap-2 border-b border-pastel-border pb-3">
-                    <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+                <div class="flex items-center gap-2.5 border-b border-pastel-border pb-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-base">
                         <i class="fa-solid fa-building-columns"></i>
                     </div>
-                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                        📑 ĐỊNH GIÁ & BỘ LỌC RỦI RO CƠ BẢN (FUNDAMENTAL HEALTH CHECK) - MÃ: <span id="faHeaderSym" class="text-blue-600">HPG</span>[cite: 3]
+                    <h3 class="text-base font-bold text-slate-900 uppercase tracking-wide">
+                        📑 ĐỊNH GIÁ & BỘ LỌC RỦI RO CƠ BẢN (FUNDAMENTAL HEALTH CHECK) - MÃ: <span id="faHeaderSym" class="text-blue-600 font-mono">HPG</span>
                     </h3>
                 </div>
 
                 <!-- Financial Health Score Card -->
                 <div class="bg-pastel-subtle p-4 rounded-xl border border-pastel-border space-y-2">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">🛡️ ĐIỂM SỨC KHỎE TÀI CHÍNH (FINANCIAL HEALTH SCORE)[cite: 3]:</span>
-                        <span id="faScoreBadge" class="text-xs font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg">TỔNG ĐIỂM: [ 85 / 100 ] 🟢 DOANH NGHIỆP RẤT KHỎE MẠNH[cite: 3]</span>
+                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">🛡️ ĐIỂM SỨC KHỎE TÀI CHÍNH (FINANCIAL HEALTH SCORE):</span>
+                        <span id="faScoreBadge" class="text-xs font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg">TỔNG ĐIỂM: [ 85 / 100 ] 🟢 DOANH NGHIỆP RẤT KHỎE MẠNH</span>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1 text-slate-700">
-                        <div>• Khả năng thanh toán: <strong class="text-slate-900">Tốt (D/E: 0.58)</strong>[cite: 3]</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm pt-1 text-slate-700 font-medium">
+                        <div>• Khả năng thanh toán: <strong class="text-slate-900">Tốt (D/E < 1.2)</strong></div>
                         <div>• Tăng trưởng LN: <strong class="text-emerald-700 font-bold">+28.5% YoY</strong></div>
-                        <div>• Cảnh báo rủi ro: <strong class="text-emerald-700 font-bold">KHÔNG CÓ VI PHẠM</strong>[cite: 3]</div>
+                        <div>• Cảnh báo rủi ro: <strong class="text-emerald-700 font-bold">KHÔNG CÓ VI PHẠM</strong></div>
                     </div>
                 </div>
 
                 <!-- So sánh Định giá Ngành -->
-                <div class="space-y-2">
+                <div class="space-y-2.5">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-scale-balanced text-blue-600"></i> 📊 SO SÁNH ĐỊNH GIÁ SO VỚI TRUNG BÌNH TOÀN THỊ TRƯỜNG[cite: 3]:
+                        <i class="fa-solid fa-scale-balanced text-blue-600"></i> 📊 SO SÁNH ĐỊNH GIÁ SO VỚI TRUNG BÌNH TOÀN THỊ TRƯỜNG:
                     </span>
                     <div class="overflow-x-auto rounded-xl border border-pastel-border">
-                        <table class="w-full text-xs text-left">
+                        <table class="w-full text-sm text-left">
                             <thead class="bg-pastel-subtle text-slate-600 border-b border-pastel-border">
                                 <tr>
-                                    <th class="p-2.5 font-bold">CHỈ SỐ CHÍNH[cite: 3]</th>
-                                    <th class="p-2.5 font-bold">DOANH NGHIỆP[cite: 3]</th>
-                                    <th class="p-2.5 font-bold">TRUNG BÌNH TOÀN SÀN[cite: 3]</th>
-                                    <th class="p-2.5 font-bold">ĐÁNH GIÁ ĐỊNH GIÁ[cite: 3]</th>
+                                    <th class="p-3 font-bold">CHỈ SỐ CHÍNH</th>
+                                    <th class="p-3 font-bold">DOANH NGHIỆP</th>
+                                    <th class="p-3 font-bold">TRUNG BÌNH TOÀN SÀN</th>
+                                    <th class="p-3 font-bold">ĐÁNH GIÁ ĐỊNH GIÁ</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-pastel-border bg-white font-mono">
                                 <tr>
-                                    <td class="p-2.5 font-sans font-bold text-slate-800">P/E (Hệ số giá/LN)[cite: 3]</td>
-                                    <td class="p-2.5 font-bold text-blue-700" id="faValPE">8.8x[cite: 3]</td>
-                                    <td class="p-2.5 text-slate-500">14.2x</td>
-                                    <td class="p-2.5 font-sans"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[11px]" id="faEvalPE">[ 🟢 RẺ HƠN THỊ TRƯỜNG ]</span></td>
+                                    <td class="p-3 font-sans font-bold text-slate-800">P/E (Hệ số giá/LN)</td>
+                                    <td class="p-3 font-bold text-blue-700" id="faValPE">--x</td>
+                                    <td class="p-3 text-slate-500">14.2x</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs" id="faEvalPE">[ 🟢 RẺ HƠN THỊ TRƯỜNG ]</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-sans font-bold text-slate-800">P/B (Giá trị sổ sách)[cite: 3]</td>
-                                    <td class="p-2.5 font-bold text-blue-700" id="faValPB">1.35x[cite: 3]</td>
-                                    <td class="p-2.5 text-slate-500">1.65x</td>
-                                    <td class="p-2.5 font-sans"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[11px]" id="faEvalPB">[ 🟢 VÙNG HẤP DẪN ]</span>[cite: 3]</td>
+                                    <td class="p-3 font-sans font-bold text-slate-800">P/B (Giá trị sổ sách)</td>
+                                    <td class="p-3 font-bold text-blue-700" id="faValPB">--x</td>
+                                    <td class="p-3 text-slate-500">1.65x</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs" id="faEvalPB">[ 🟢 VÙNG HẤP DẪN ]</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-sans font-bold text-slate-800">ROE (Hiệu quả sử dụng vốn)[cite: 3]</td>
-                                    <td class="p-2.5 font-bold text-emerald-700" id="faValROE">18.6%[cite: 3]</td>
-                                    <td class="p-2.5 text-slate-500">13.0%</td>
-                                    <td class="p-2.5 font-sans"><span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[11px]" id="faEvalROE">[ ⭐ VƯỢT TRỘI ]</span></td>
+                                    <td class="p-3 font-sans font-bold text-slate-800">ROE (Hiệu quả sử dụng vốn)</td>
+                                    <td class="p-3 font-bold text-emerald-700" id="faValROE">--%</td>
+                                    <td class="p-3 text-slate-500">13.0%</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200 font-bold text-xs" id="faEvalROE">[ ⭐ VƯỢT TRỘI ]</span></td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-sans font-bold text-slate-800">Tỷ suất Cổ tức[cite: 3]</td>
-                                    <td class="p-2.5 font-bold text-slate-900" id="faValDiv">4.2% / năm[cite: 3]</td>
-                                    <td class="p-2.5 text-slate-500">2.5% / năm</td>
-                                    <td class="p-2.5 font-sans"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[11px]" id="faEvalDiv">[ 🟢 ỔN ĐỊNH ]</span>[cite: 3]</td>
+                                    <td class="p-3 font-sans font-bold text-slate-800">Tỷ suất Cổ tức</td>
+                                    <td class="p-3 font-bold text-slate-900" id="faValDiv">--% / năm</td>
+                                    <td class="p-3 text-slate-500">2.5% / năm</td>
+                                    <td class="p-3 font-sans"><span class="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs" id="faEvalDiv">[ 🟢 ỔN ĐỊNH ]</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -469,39 +475,39 @@
                 </div>
 
                 <!-- Value Trap Filter Checklist -->
-                <div class="space-y-2">
+                <div class="space-y-2.5">
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-list-check text-emerald-600"></i> 🚦 BỘ LỌC RỦI RO & BẪY GIÁ (VALUE TRAP FILTER)[cite: 3]:
+                        <i class="fa-solid fa-list-check text-emerald-600"></i> 🚦 BỘ LỌC RỦI RO & BẪY GIÁ (VALUE TRAP FILTER):
                     </span>
                     <div class="overflow-x-auto rounded-xl border border-pastel-border">
-                        <table class="w-full text-xs text-left">
+                        <table class="w-full text-sm text-left">
                             <thead class="bg-pastel-subtle text-slate-600 border-b border-pastel-border">
                                 <tr>
-                                    <th class="p-2.5 font-bold">TIÊU CHÍ KIỂM TRA[cite: 3]</th>
-                                    <th class="p-2.5 font-bold">KẾT QUẢ ĐẠT ĐƯỢC[cite: 3]</th>
-                                    <th class="p-2.5 font-bold">TRẠNG THÁI RỦI RO[cite: 3]</th>
+                                    <th class="p-3 font-bold">TIÊU CHÍ KIỂM TRA</th>
+                                    <th class="p-3 font-bold">KẾT QUẢ ĐẠT ĐƯỢC</th>
+                                    <th class="p-3 font-bold">TRẠNG THÁI RỦI RO</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-pastel-border bg-white">
                                 <tr>
-                                    <td class="p-2.5 font-medium text-slate-800">1. Rủi ro Cổ phiếu Rác (Penny/Junk)[cite: 3]</td>
-                                    <td class="p-2.5 text-slate-600" id="trapPennyResult">Vốn hóa Top ngành, thanh khoản cao[cite: 3]</td>
-                                    <td class="p-2.5 font-bold text-emerald-700">[ ✅ AN TOÀN TUYỆT ĐỐI ][cite: 3]</td>
+                                    <td class="p-3 font-medium text-slate-800">1. Rủi ro Cổ phiếu Rác (Penny/Junk)</td>
+                                    <td class="p-3 text-slate-600" id="trapPennyResult">Vốn hóa lớn/vừa, thanh khoản dồi dào trên sàn</td>
+                                    <td class="p-3 font-bold text-emerald-700">[ ✅ AN TOÀN TUYỆT ĐỐI ]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-medium text-slate-800">2. Rủi ro Pha loãng cổ phiếu[cite: 3]</td>
-                                    <td class="p-2.5 text-slate-600">Không có kế hoạch phát hành riêng lẻ[cite: 3]</td>
-                                    <td class="p-2.5 font-bold text-emerald-700">[ ✅ AN TOÀN ][cite: 3]</td>
+                                    <td class="p-3 font-medium text-slate-800">2. Rủi ro Pha loãng cổ phiếu</td>
+                                    <td class="p-3 text-slate-600">Không có kế hoạch phát hành riêng lẻ</td>
+                                    <td class="p-3 font-bold text-emerald-700">[ ✅ AN TOÀN ]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-medium text-slate-800">3. Rủi ro Đòn bẩy nợ vay (D/E)[cite: 3]</td>
-                                    <td class="p-2.5 text-slate-600">Nợ vay / Vốn CSH kiểm soát dưới 1.2[cite: 3]</td>
-                                    <td class="p-2.5 font-bold text-emerald-700">[ ✅ ĐẠT TIÊU CHUẨN ][cite: 3]</td>
+                                    <td class="p-3 font-medium text-slate-800">3. Rủi ro Đòn bẩy nợ vay (D/E)</td>
+                                    <td class="p-3 text-slate-600">Nợ vay / Vốn CSH kiểm soát dưới 1.2</td>
+                                    <td class="p-3 font-bold text-emerald-700">[ ✅ ĐẠT TIÊU CHUẨN ]</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 font-medium text-slate-800">4. Lịch sự kiện & Quyền cổ đông 2026[cite: 3]</td>
-                                    <td class="p-2.5 text-slate-600 font-medium" id="trapEventsResult">Đang tải lịch sự kiện 2026...</td>
-                                    <td class="p-2.5 font-bold text-amber-700">[ ⚠️ LƯU Ý LỊCH T+ ][cite: 3]</td>
+                                    <td class="p-3 font-medium text-slate-800">4. Lịch sự kiện & Quyền cổ đông 2026</td>
+                                    <td class="p-3 text-slate-600 font-medium" id="trapEventsResult">Đang tải lịch sự kiện 2026...</td>
+                                    <td class="p-3 font-bold text-amber-700">[ ⚠️ LƯU Ý LỊCH T+ ]</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -511,10 +517,10 @@
                 <!-- Tóm Tắt Tín Hiệu AI Box 3 -->
                 <div class="bg-pastel-greenBg border border-pastel-greenBorder rounded-xl p-4 space-y-1.5 shadow-sm">
                     <span class="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-amber-600 text-sm"></i> 💡 KẾT LUẬN TỔNG HỢP TỪ AI (FA OVERLAY)[cite: 3]:
+                        <i class="fa-solid fa-lightbulb text-amber-600 text-sm"></i> 💡 KẾT LUẬN TỔNG HỢP TỪ AI (FA OVERLAY):
                     </span>
-                    <p id="aiFaSummary" class="text-xs text-slate-700 leading-relaxed font-medium">
-                        "Cổ phiếu không thuộc nhóm bẫy giá (Value Trap). Nền tảng tài chính lành mạnh và hiệu quả sinh lời ROE cao tạo bệ đỡ vững chắc cho các điểm nổ breakout kỹ thuật."[cite: 3]
+                    <p id="aiFaSummary" class="text-sm text-slate-700 leading-relaxed font-medium">
+                        "Cổ phiếu không thuộc nhóm bẫy giá (Value Trap). Nền tảng tài chính lành mạnh và hiệu quả sinh lời ROE cao tạo bệ đỡ vững chắc cho các điểm nổ breakout kỹ thuật."
                     </p>
                 </div>
             </section>
@@ -528,7 +534,7 @@
                     <span class="text-xs font-bold text-slate-700 tracking-wider uppercase flex items-center gap-1.5 border-b border-pastel-border pb-2">
                         <i class="fa-solid fa-list-check text-blue-600"></i> LUẬN ĐIỂM ĐẦU TƯ CHI TIẾT
                     </span>
-                    <ul id="resCatalysts" class="text-xs text-slate-700 space-y-2.5 leading-relaxed">
+                    <ul id="resCatalysts" class="text-sm text-slate-700 space-y-2.5 leading-relaxed font-medium">
                         <!-- Filled by JS -->
                     </ul>
                 </div>
@@ -539,12 +545,12 @@
                         <span class="text-xs font-bold text-slate-700 tracking-wider uppercase flex items-center gap-1.5">
                             <i class="fa-solid fa-chart-area text-blue-600"></i> DỰ BÁO ĐƯỜNG ĐI CỦA GIÁ 5 PHIÊN KẾ TIẾP (T+5)
                         </span>
-                        <span class="text-[11px] text-slate-400 font-mono">Đơn vị: VNĐ</span>
+                        <span class="text-xs text-slate-400 font-mono">Đơn vị: VNĐ</span>
                     </div>
-                    <div class="h-60 relative w-full">
+                    <div class="h-64 relative w-full">
                         <canvas id="predictionChart"></canvas>
                     </div>
-                    <p id="resPredictionComment" class="text-xs text-slate-700 italic bg-pastel-subtle p-3 rounded-xl border border-pastel-border font-medium"></p>
+                    <p id="resPredictionComment" class="text-sm text-slate-700 italic bg-pastel-subtle p-3 rounded-xl border border-pastel-border font-medium"></p>
                 </div>
             </section>
 
@@ -561,16 +567,16 @@
                     <button onclick="closeScreenerModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 <div id="screenerContent" class="overflow-x-auto">
-                    <table class="w-full text-xs text-left font-mono">
-                        <thead class="text-slate-600 bg-pastel-subtle border-b border-pastel-border font-sans">
+                    <table class="w-full text-sm text-left font-mono">
+                        <thead class="text-slate-600 bg-pastel-subtle border-b border-pastel-border font-sans text-xs">
                             <tr>
-                                <th class="p-2.5 font-bold">MÃ</th>
-                                <th class="p-2.5 font-bold">GIÁ KHỚP</th>
-                                <th class="p-2.5 font-bold">% TĂNG</th>
-                                <th class="p-2.5 font-bold">KL / TB20</th>
-                                <th class="p-2.5 font-bold">RSI (14)</th>
-                                <th class="p-2.5 font-bold font-sans">TÍN HIỆU CÁ MẬP</th>
-                                <th class="p-2.5 font-bold font-sans">THAO TÁC</th>
+                                <th class="p-3 font-bold">MÃ</th>
+                                <th class="p-3 font-bold">GIÁ KHỚP</th>
+                                <th class="p-3 font-bold">% TĂNG</th>
+                                <th class="p-3 font-bold">KL / TB20</th>
+                                <th class="p-3 font-bold">RSI (14)</th>
+                                <th class="p-3 font-bold font-sans">TÍN HIỆU CÁ MẬP</th>
+                                <th class="p-3 font-bold font-sans">THAO TÁC</th>
                             </tr>
                         </thead>
                         <tbody id="screenerTableBody" class="divide-y divide-pastel-border bg-white">
@@ -629,7 +635,7 @@
             document.getElementById('vnindexPoint').textContent = m.macro_vnindex.vnindex_point.toLocaleString();
             const chgEl = document.getElementById('vnindexChange');
             chgEl.textContent = (m.macro_vnindex.vnindex_change_pct >= 0 ? '+' : '') + m.macro_vnindex.vnindex_change_pct + '%';
-            chgEl.className = m.macro_vnindex.vnindex_change_pct >= 0 ? 'text-xs font-bold text-emerald-600' : 'text-xs font-bold text-rose-600';
+            chgEl.className = m.macro_vnindex.vnindex_change_pct >= 0 ? 'text-sm font-bold text-emerald-600 font-mono' : 'text-sm font-bold text-rose-600 font-mono';
             document.getElementById('vnindexRsi').textContent = m.macro_vnindex.vnindex_rsi;
             document.getElementById('vnindexStatus').textContent = m.macro_vnindex.macro_status;
             document.getElementById('macroRiskLevel').textContent = adv.market_sentiment.market_risk_level;
@@ -637,8 +643,8 @@
             // 2. Alert Banner
             if (m.realtime_alerts && m.realtime_alerts.has_active_alert) {
                 const banner = document.getElementById('alertBanner');
-                banner.className = 'rounded-xl border p-3 bg-amber-50 border-amber-200 text-amber-800 text-xs flex items-center gap-2 shadow-sm font-semibold';
-                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 text-sm"></i> <span>${m.realtime_alerts.alert_messages.join(' | ')}</span>`;
+                banner.className = 'rounded-xl border p-3.5 bg-amber-50 border-amber-200 text-amber-800 text-sm flex items-center gap-2.5 shadow-sm font-semibold';
+                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 text-base"></i> <span>${m.realtime_alerts.alert_messages.join(' | ')}</span>`;
                 banner.classList.remove('hidden');
             }
 
@@ -651,10 +657,10 @@
             
             const sChg = document.getElementById('resChange');
             sChg.textContent = (m.percent_change >= 0 ? '+' : '') + m.percent_change.toFixed(2) + '%';
-            sChg.className = m.percent_change >= 0 ? 'text-sm font-bold text-emerald-600 font-mono' : 'text-sm font-bold text-rose-600 font-mono';
+            sChg.className = m.percent_change >= 0 ? 'text-base font-bold text-emerald-600 font-mono' : 'text-base font-bold text-rose-600 font-mono';
 
             document.getElementById('resBadgeRating').textContent = m.signal_reliability.badge_rating;
-            document.getElementById('resWinRate').innerHTML = `Winrate T+5: <strong class="text-slate-900">${m.signal_reliability.win_rate}%</strong>`;
+            document.getElementById('resWinRate').innerHTML = `Winrate T+5: <strong class="text-slate-900 font-mono">${m.signal_reliability.win_rate}%</strong>`;
             document.getElementById('resVol').textContent = m.volume.toLocaleString() + ' CP';
             document.getElementById('resAvgVol').textContent = m.avg_vol_20.toLocaleString() + ' CP';
             document.getElementById('resRSI').textContent = m.rsi;
@@ -670,9 +676,7 @@
             document.getElementById('resRR').textContent = adv.risk_reward_ratio;
             document.getElementById('resTrend').textContent = `${adv.trend_weekly} / ${adv.trend_monthly}`;
 
-            // =====================================
-            // 5. RENDER DEMO 1: ORDERFLOW ENGINE
-            // =====================================
+            // 5. Orderflow Module
             const of = m.orderflow_pressure;
             document.getElementById('resSmartMoneyAction').textContent = of.smart_money_signal;
             document.getElementById('resBuyVolDetailed').textContent = `${of.active_buy_volume.toLocaleString()} CP (${of.active_buy_pct}%)`;
@@ -685,7 +689,7 @@
             const netVolFormatted = Math.abs(of.net_active_volume).toLocaleString();
             const netPrefix = of.net_active_volume >= 0 ? '▲ Mua ròng chủ động: +' : '▼ Bán ròng chủ động: -';
             const netControl = of.net_active_volume >= 0 ? '(Bên Mua kiểm soát hoàn toàn thế trận 🟢)' : '(Bên Bán đang gây áp lực điều chỉnh 🔴)';
-            document.getElementById('resNetActiveSummary').innerHTML = `<i class="fa-solid ${of.net_active_volume >= 0 ? 'fa-caret-up text-emerald-600' : 'fa-caret-down text-rose-600'} text-base"></i> <span>${netPrefix}${netVolFormatted} CP ${netControl}</span>`;
+            document.getElementById('resNetActiveSummary').innerHTML = `<i class="fa-solid ${of.net_active_volume >= 0 ? 'fa-caret-up text-emerald-600' : 'fa-caret-down text-rose-600'} text-lg"></i> <span>${netPrefix}${netVolFormatted} CP ${netControl}</span>`;
 
             // Breakdown Tiers
             const sharkBuy = Math.round(of.active_buy_volume * 0.536);
@@ -694,7 +698,7 @@
             document.getElementById('ofSharkBuy').textContent = `${sharkBuy.toLocaleString()} CP (53.6%)`;
             document.getElementById('ofSharkSell').textContent = `${sharkSell.toLocaleString()} CP (24.3%)`;
             document.getElementById('ofSharkBadge').textContent = `[${sharkNet >= 0 ? '🟢 Gom ròng +' : '🔴 Xả ròng -'}${(Math.abs(sharkNet)/1000000).toFixed(1)}M]`;
-            document.getElementById('ofSharkBadge').className = `px-2 py-0.5 rounded ${sharkNet >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'} font-bold text-[11px] font-mono`;
+            document.getElementById('ofSharkBadge').className = `px-2.5 py-1 rounded ${sharkNet >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'} font-bold text-xs font-mono`;
 
             const dolBuy = Math.round(of.active_buy_volume * 0.306);
             const dolSell = Math.round(of.active_sell_volume * 0.422);
@@ -702,7 +706,7 @@
             document.getElementById('ofDolphinBuy').textContent = `${dolBuy.toLocaleString()} CP (30.6%)`;
             document.getElementById('ofDolphinSell').textContent = `${dolSell.toLocaleString()} CP (42.2%)`;
             document.getElementById('ofDolphinBadge').textContent = `[${dolNet >= 0 ? '🟢 Mua ròng +' : '🔴 Bán ròng -'}${(Math.abs(dolNet)/1000000).toFixed(1)}M]`;
-            document.getElementById('ofDolphinBadge').className = `px-2 py-0.5 rounded ${dolNet >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'} font-bold text-[11px] font-mono`;
+            document.getElementById('ofDolphinBadge').className = `px-2.5 py-1 rounded ${dolNet >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'} font-bold text-xs font-mono`;
 
             const retBuy = Math.round(of.active_buy_volume * 0.158);
             const retSell = Math.round(of.active_sell_volume * 0.335);
@@ -710,13 +714,11 @@
             document.getElementById('ofRetailBuy').textContent = `${retBuy.toLocaleString()} CP (15.8%)`;
             document.getElementById('ofRetailSell').textContent = `${retSell.toLocaleString()} CP (33.5%)`;
             document.getElementById('ofRetailBadge').textContent = `[${retNet >= 0 ? '🟢 Mua ròng +' : '🔴 Bán ròng -'}${(Math.abs(retNet)/1000000).toFixed(1)}M]`;
-            document.getElementById('ofRetailBadge').className = `px-2 py-0.5 rounded ${retNet >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'} font-bold text-[11px] font-mono`;
+            document.getElementById('ofRetailBadge').className = `px-2.5 py-1 rounded ${retNet >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'} font-bold text-xs font-mono`;
 
             document.getElementById('aiOrderflowSummary').textContent = `"${m.symbol}: Lực mua chủ động đạt ${of.active_buy_pct}%. Tín hiệu ${of.smart_money_signal.toLowerCase()}. Dòng tiền lớn kiểm soát lượng cung quanh các mốc hỗ trợ kỹ thuật."`;
 
-            // =====================================
-            // 6. RENDER DEMO 2: ATR DYNAMIC RISK
-            // =====================================
+            // 6. ATR Dynamic Risk Module
             const atr = m.atr_risk_management;
             document.getElementById('atrValueCard').textContent = `${atr.atr_14.toLocaleString()} VNĐ`;
             document.getElementById('atrPctCard').textContent = `±${atr.atr_percent}%`;
@@ -728,7 +730,7 @@
             document.getElementById('atrTableSL').textContent = `${atr.dynamic_stop_loss.toLocaleString()} VNĐ (${((atr.dynamic_stop_loss - m.current_price)/m.current_price*100).toFixed(2)}%)`;
             document.getElementById('atrTableTrailing').textContent = `${atr.trailing_stop.toLocaleString()} VNĐ (${((atr.trailing_stop - m.current_price)/m.current_price*100).toFixed(2)}%)`;
 
-            document.getElementById('noiseMidText').textContent = `🟩 ${m.symbol} ĐANG Ở VÙNG NÀY (${atr.atr_percent}%)`;
+            document.getElementById('noiseMidText').textContent = `🟩 ${m.symbol} ĐANG Ở VÙNG NÀY (±${atr.atr_percent}%)`;
             
             const atrAdviceList = document.getElementById('aiAtrCapitalAdvice');
             atrAdviceList.innerHTML = `
@@ -736,9 +738,7 @@
                 <li>• Khi giá bứt phá vượt qua <strong>${atr.dynamic_target.toLocaleString()} VNĐ</strong>, tự động nâng Trailing Stop lên mốc <strong>${atr.trailing_stop.toLocaleString()} VNĐ</strong> để bảo toàn lợi nhuận.</li>
             `;
 
-            // =====================================
-            // 7. RENDER DEMO 3: FUNDAMENTAL & TRAP
-            // =====================================
+            // 7. Fundamental Module
             const fa = m.fundamental_overlay;
             document.getElementById('faScoreBadge').textContent = `TỔNG ĐIỂM: [ ${fa.health_score} / 100 ] 🟢 DOANH NGHIỆP RẤT KHỎE MẠNH`;
             document.getElementById('faValPE').textContent = `${fa.pe_ratio}x`;
@@ -756,8 +756,8 @@
             catList.innerHTML = '';
             adv.catalysts.forEach(c => {
                 const li = document.createElement('li');
-                li.className = 'flex items-start gap-2';
-                li.innerHTML = `<i class="fa-solid fa-circle-check text-blue-600 mt-1 text-[11px]"></i> <span>${c}</span>`;
+                li.className = 'flex items-start gap-2.5';
+                li.innerHTML = `<i class="fa-solid fa-circle-check text-blue-600 mt-1 text-xs"></i> <span>${c}</span>`;
                 catList.appendChild(li);
             });
 
@@ -790,7 +790,7 @@
                             borderWidth: 2,
                             tension: 0.3,
                             fill: true,
-                            pointRadius: 3,
+                            pointRadius: 3.5,
                             pointBackgroundColor: '#64748B'
                         },
                         {
@@ -802,7 +802,7 @@
                             borderWidth: 2.5,
                             tension: 0.3,
                             fill: true,
-                            pointRadius: 4,
+                            pointRadius: 4.5,
                             pointBackgroundColor: '#2563EB'
                         }
                     ]
@@ -811,12 +811,12 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, labels: { color: '#475569', font: { size: 11, weight: '600' } } },
+                        legend: { display: true, labels: { color: '#334155', font: { size: 13, weight: '600' } } },
                         tooltip: { mode: 'index', intersect: false }
                     },
                     scales: {
-                        x: { grid: { color: '#E2EAF1' }, ticks: { color: '#64748B', font: { size: 10, family: 'monospace' } } },
-                        y: { grid: { color: '#E2EAF1' }, ticks: { color: '#64748B', font: { size: 10, family: 'monospace' } } }
+                        x: { grid: { color: '#E2EAF1' }, ticks: { color: '#64748B', font: { size: 12, family: 'monospace' } } },
+                        y: { grid: { color: '#E2EAF1' }, ticks: { color: '#64748B', font: { size: 12, family: 'monospace' } } }
                     }
                 }
             });
@@ -825,7 +825,7 @@
         async function fetchDailyScreener() {
             const modal = document.getElementById('screenerModal');
             const tbody = document.getElementById('screenerTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-500 font-sans font-medium">Đang quét toàn bộ rổ cổ phiếu sau phiên ATC...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-500 font-sans font-medium text-sm">Đang quét toàn bộ rổ cổ phiếu sau phiên ATC...</td></tr>';
             modal.classList.remove('hidden');
 
             try {
@@ -836,20 +836,20 @@
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-50 transition-colors font-mono';
                     tr.innerHTML = `
-                        <td class="p-2.5 font-bold text-slate-900">${p.symbol}</td>
-                        <td class="p-2.5 font-medium text-slate-800">${p.price.toLocaleString()}</td>
-                        <td class="p-2.5 font-bold ${p.change_pct >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${p.change_pct >= 0 ? '+' : ''}${p.change_pct}%</td>
-                        <td class="p-2.5 text-amber-700 font-bold">${p.vol_vs_avg20}x</td>
-                        <td class="p-2.5 font-medium text-slate-700">${p.rsi}</td>
-                        <td class="p-2.5 text-[11px] font-sans font-semibold text-slate-700">${p.smart_money_signal}</td>
-                        <td class="p-2.5 font-sans">
-                            <button onclick="selectScreenerStock('${p.symbol}')" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-semibold shadow-sm transition-colors">Xem</button>
+                        <td class="p-3 font-bold text-slate-900">${p.symbol}</td>
+                        <td class="p-3 font-medium text-slate-800">${p.price.toLocaleString()}</td>
+                        <td class="p-3 font-bold ${p.change_pct >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${p.change_pct >= 0 ? '+' : ''}${p.change_pct}%</td>
+                        <td class="p-3 text-amber-700 font-bold">${p.vol_vs_avg20}x</td>
+                        <td class="p-3 font-medium text-slate-700">${p.rsi}</td>
+                        <td class="p-3 text-xs font-sans font-semibold text-slate-700">${p.smart_money_signal}</td>
+                        <td class="p-3 font-sans">
+                            <button onclick="selectScreenerStock('${p.symbol}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow-sm transition-colors">Xem</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-rose-600 font-sans">Lỗi: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-rose-600 font-sans text-sm">Lỗi: ${err.message}</td></tr>`;
             }
         }
 
